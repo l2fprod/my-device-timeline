@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Device, WikipediaSearchResult, DeviceCategory } from './types/types';
 import Timeline from './components/Timeline';
 import DeviceSearch from './components/DeviceSearch';
-import ExportModal from './components/ExportModal';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Monitor, Plus, History, Share } from 'lucide-react';
+import { Monitor, Plus, History, Linkedin, Image } from 'lucide-react';
+import { formatForLinkedIn, copyToClipboard, exportAsImage } from './utils/exportUtils';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [showSearch, setShowSearch] = useState(false);
-  const [showExport, setShowExport] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   // Load devices from localStorage on component mount
   useEffect(() => {
@@ -57,14 +58,25 @@ function App() {
     setDevices(devices.filter(device => device.id !== id));
   };
 
-  const handleExport = () => {
-    setShowExport(true);
-  };
-
   const handleLoadSampleDevices = () => {
     if (window.confirm('This will add 20 sample devices to your timeline. Continue?')) {
       const sampleDevices = getSampleDevices();
       setDevices([...devices, ...sampleDevices]);
+    }
+  };
+
+  const handleCopyForLinkedIn = async () => {
+    const text = formatForLinkedIn(devices);
+    const success = await copyToClipboard(text);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    if (timelineRef.current) {
+      await exportAsImage(timelineRef.current, 'tech-timeline.png');
     }
   };
 
@@ -93,11 +105,18 @@ function App() {
                 Add Device
               </button>
               <button
-                onClick={handleExport}
+                onClick={handleCopyForLinkedIn}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <Share size={16} className="mr-2" />
-                Export
+                <Linkedin size={16} className="mr-2" />
+                {copied ? 'Copied!' : 'Copy for LinkedIn'}
+              </button>
+              <button
+                onClick={handleDownloadImage}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Image size={16} className="mr-2" />
+                Download Image
               </button>
             </div>
           </div>
@@ -105,28 +124,20 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Timeline 
-          devices={devices}
-          onAddDevice={handleAddDevice}
-          onExport={handleExport}
-          onUpdateDevice={handleUpdateDevice}
-          onDeleteDevice={handleDeleteDevice}
-        />
+        <div ref={timelineRef}>
+          <Timeline 
+            devices={devices}
+            onAddDevice={handleAddDevice}
+            onUpdateDevice={handleUpdateDevice}
+            onDeleteDevice={handleDeleteDevice}
+          />
+        </div>
       </main>
 
       {showSearch && (
         <DeviceSearch 
           onSelectDevice={handleSelectDevice}
           onCancel={() => setShowSearch(false)}
-        />
-      )}
-
-      {showExport && (
-        <ExportModal 
-          devices={devices}
-          onClose={() => setShowExport(false)}
-          onUpdateDevice={handleUpdateDevice}
-          onDeleteDevice={handleDeleteDevice}
         />
       )}
     </div>

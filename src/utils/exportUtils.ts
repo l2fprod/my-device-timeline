@@ -8,14 +8,28 @@ export const formatForLinkedIn = (devices: Device[]): string => {
   
   let output = '📱 My Technology Journey 💻\n\n';
   
-  sortedDevices.forEach(device => {
-    const timeRange = formatTimeRange(device.startYear, device.endYear);
-    output += `🔹 ${device.name} (${timeRange})\n`;
-    if (device.notes) {
-      output += `   ${device.notes}\n`;
+  // Group devices by year
+  const devicesByYear = sortedDevices.reduce((acc, device) => {
+    if (!acc[device.startYear]) {
+      acc[device.startYear] = [];
     }
-    output += '\n';
-  });
+    acc[device.startYear].push(device);
+    return acc;
+  }, {} as Record<number, Device[]>);
+  
+  // Output devices grouped by year
+  Object.entries(devicesByYear)
+    .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+    .forEach(([year, yearDevices]) => {
+      output += `📅 ${year}\n`;
+      yearDevices.forEach(device => {
+        output += `🔹 ${device.name}\n`;
+        if (device.notes) {
+          output += `   ${device.notes}\n`;
+        }
+      });
+      output += '\n';
+    });
   
   output += '#TechJourney #Technology #ProfessionalDevelopment';
   

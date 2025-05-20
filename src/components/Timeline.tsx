@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface TimelineProps {
   onAddDevice: () => void;
-  onExport: () => void;
   devices: Device[];
   onUpdateDevice: (updatedDevice: Device) => void;
   onDeleteDevice: (id: string) => void;
@@ -15,7 +14,6 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({ 
   onAddDevice, 
-  onExport, 
   devices, 
   onUpdateDevice, 
   onDeleteDevice 
