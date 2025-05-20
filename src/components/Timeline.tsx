@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Device, WikipediaSearchResult, DeviceCategory } from '../types/types';
+import { Device } from '../types/types';
 import DeviceCard from './DeviceCard';
 import { saveDevices, loadDevices } from '../services/storageService';
 import { Plus, Share } from 'lucide-react';
-import { v4 as uuidv4 } from '@types/uuid'; // Simulated UUID
+import { v4 as uuidv4 } from 'uuid';
 
 interface TimelineProps {
   onAddDevice: () => void;
@@ -21,6 +21,7 @@ const Timeline: React.FC<TimelineProps> = ({
   onDeleteDevice 
 }) => {
   const [timeline, setTimeline] = useState<Record<number, Device[]>>({});
+  const [globalIndex, setGlobalIndex] = useState(0);
   
   // Group devices by year for timeline display
   useEffect(() => {
@@ -89,28 +90,53 @@ const Timeline: React.FC<TimelineProps> = ({
         </div>
       </div>
       
-      <div className="space-y-10">
-        {years.map(year => (
-          <div key={year} className="relative">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg z-10">
-                {year}
+      <div className="relative max-w-6xl mx-auto">
+        {/* Vertical timeline line */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-blue-200"></div>
+        
+        <div className="space-y-16">
+          {years.map(year => (
+            <div key={year} className="relative">
+              {/* Year label */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-1 rounded-full border border-blue-200 shadow-sm z-10">
+                <h3 className="text-lg font-bold text-gray-900">{year}</h3>
               </div>
-              <div className="h-1 bg-blue-200 flex-grow ml-4"></div>
+              
+              {/* Devices for this year */}
+              <div className="mt-8 grid grid-cols-2 gap-x-16">
+                {timeline[year].map((device, localIndex) => {
+                  // Calculate global index for consistent alternation
+                  const globalIndex = years
+                    .slice(0, years.indexOf(year))
+                    .reduce((acc, y) => acc + timeline[y].length, 0) + localIndex;
+                  const isLeft = globalIndex % 2 === 0;
+                  
+                  return (
+                    <div
+                      key={device.id}
+                      className={`relative ${isLeft ? 'col-start-1' : 'col-start-2'}`}
+                    >
+                      {/* Connector line */}
+                      <div 
+                        className={`absolute top-1/2 ${isLeft ? 'right-0' : 'left-0'} w-8 h-0.5 bg-blue-200`}
+                        style={{ [isLeft ? 'right' : 'left']: '-2rem' }}
+                      />
+                      
+                      {/* Device card */}
+                      <div className={`${isLeft ? 'mr-8' : 'ml-8'}`}>
+                        <DeviceCard 
+                          device={device}
+                          onUpdate={onUpdateDevice}
+                          onDelete={onDeleteDevice}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-16">
-              {timeline[year].map(device => (
-                <DeviceCard 
-                  key={device.id} 
-                  device={device}
-                  onUpdate={onUpdateDevice}
-                  onDelete={onDeleteDevice}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
