@@ -152,9 +152,6 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${getCategoryColor(device.category)}`}>
               {deviceCategories.find(c => c.value === device.category)?.label}
             </span>
-            <span className="text-xs text-gray-500">
-              {formatTimeRange(device.startYear, device.endYear)}
-            </span>
           </div>
           {device.notes && (
             <p className="text-xs text-gray-600 line-clamp-1">{device.notes}</p>
