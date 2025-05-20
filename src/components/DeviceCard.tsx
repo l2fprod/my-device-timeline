@@ -109,8 +109,8 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="flex">
-        <div className="w-20 h-20 flex-shrink-0 bg-gray-100">
+      <div className="flex flex-col sm:flex-row">
+        <div className="w-full sm:w-20 h-20 flex-shrink-0 bg-gray-100">
           <img
             src={device.imageUrl}
             alt={device.name}
@@ -148,13 +148,13 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
               </button>
             </div>
           </div>
-          <div className="flex items-center space-x-2 mb-1">
+          <div className="hidden sm:flex items-center space-x-2 mb-1">
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${getCategoryColor(device.category)}`}>
               {deviceCategories.find(c => c.value === device.category)?.label}
             </span>
           </div>
           {device.notes && (
-            <p className="text-xs text-gray-600 line-clamp-1">{device.notes}</p>
+            <p className="text-xs text-gray-600 line-clamp-1 sm:line-clamp-2 md:line-clamp-3 hidden sm:block">{device.notes}</p>
           )}
         </div>
       </div>
