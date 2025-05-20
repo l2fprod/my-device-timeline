@@ -111,10 +111,15 @@ const Timeline: React.FC<TimelineProps> = ({
                     .reduce((acc, y) => acc + timeline[y].length, 0) + localIndex;
                   const isLeft = globalIndex % 2 === 0;
                   
+                  // Calculate if this is a consecutive device on the same side
+                  const prevDeviceIndex = localIndex - 2;
+                  const isConsecutiveOnSameSide = prevDeviceIndex >= 0 && 
+                    (globalIndex % 2 === (globalIndex - 2) % 2);
+                  
                   return (
                     <div
                       key={device.id}
-                      className={`relative ${isLeft ? 'col-start-1' : 'col-start-2'}`}
+                      className={`relative ${isLeft ? 'col-start-1' : 'col-start-2'} ${isConsecutiveOnSameSide ? 'mt-12' : 'mt-4'}`}
                     >
                       {/* Connector line */}
                       <div 
