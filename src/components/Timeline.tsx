@@ -68,10 +68,6 @@ const Timeline: React.FC<TimelineProps> = ({
   
   return (
     <div className="py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Your Technology Timeline</h2>
-      </div>
-      
       <div className="relative max-w-6xl mx-auto">
         {/* Vertical timeline line */}
         <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-blue-200"></div>
