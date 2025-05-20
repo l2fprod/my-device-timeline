@@ -15,6 +15,7 @@ interface DeviceCardProps {
 const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDevice, setEditedDevice] = useState(device);
+  const [imageFit, setImageFit] = useState<'cover' | 'contain'>('cover');
   const yearOptions = getYearOptions();
   
   const deviceCategories: { value: DeviceCategory; label: string }[] = [
@@ -37,6 +38,13 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
   const handleCancel = () => {
     setEditedDevice(device);
     setIsEditing(false);
+  };
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalHeight > img.naturalWidth) {
+      setImageFit('contain');
+    }
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -114,8 +122,9 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
           <img
             src={device.imageUrl}
             alt={device.name}
+            onLoad={handleImageLoad}
             onError={handleImageError}
-            className="w-full h-full object-cover p-1"
+            className={`w-full h-full object-${imageFit} p-1`}
           />
         </div>
         <div className="flex-1 p-2 min-w-0">
