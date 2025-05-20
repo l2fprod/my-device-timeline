@@ -72,22 +72,6 @@ const Timeline: React.FC<TimelineProps> = ({
     <div className="py-8 px-4">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800">Your Technology Timeline</h2>
-        <div className="flex space-x-3">
-          <button
-            onClick={onAddDevice}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={18} className="mr-1" />
-            Add Device
-          </button>
-          <button
-            onClick={onExport}
-            className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Share size={18} className="mr-1" />
-            Export
-          </button>
-        </div>
       </div>
       
       <div className="relative max-w-6xl mx-auto">

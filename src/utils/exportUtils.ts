@@ -1,5 +1,6 @@
 import { Device } from '../types/types';
 import { formatTimeRange } from './dateUtils';
+import html2canvas from 'html2canvas';
 
 export const formatForLinkedIn = (devices: Device[]): string => {
   // Sort devices by start year (most recent first)
@@ -28,5 +29,25 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   } catch (error) {
     console.error('Failed to copy text:', error);
     return false;
+  }
+};
+
+export const exportAsImage = async (element: HTMLElement, fileName: string): Promise<void> => {
+  try {
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2, // Higher quality
+      logging: false,
+      useCORS: true,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight
+    });
+    
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (error) {
+    console.error('Failed to export image:', error);
   }
 };

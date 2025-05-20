@@ -5,7 +5,7 @@ import DeviceSearch from './components/DeviceSearch';
 import ExportModal from './components/ExportModal';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Monitor, Plus, History } from 'lucide-react';
+import { Monitor, Plus, History, Share } from 'lucide-react';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -92,6 +92,13 @@ function App() {
                 <Plus size={16} className="mr-2" />
                 Add Device
               </button>
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Share size={16} className="mr-2" />
+                Export
+              </button>
             </div>
           </div>
         </div>
@@ -118,6 +125,8 @@ function App() {
         <ExportModal 
           devices={devices}
           onClose={() => setShowExport(false)}
+          onUpdateDevice={handleUpdateDevice}
+          onDeleteDevice={handleDeleteDevice}
         />
       )}
     </div>
