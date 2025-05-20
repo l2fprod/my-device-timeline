@@ -8,6 +8,21 @@ interface DeviceSearchProps {
   onCancel: () => void;
 }
 
+const getCategoryColor = (category: DeviceCategory): string => {
+  const colors: Record<DeviceCategory, string> = {
+    smartphone: 'bg-blue-100 text-blue-800',
+    laptop: 'bg-purple-100 text-purple-800',
+    desktop: 'bg-indigo-100 text-indigo-800',
+    tablet: 'bg-green-100 text-green-800',
+    smartwatch: 'bg-yellow-100 text-yellow-800',
+    gaming: 'bg-red-100 text-red-800',
+    audio: 'bg-pink-100 text-pink-800',
+    camera: 'bg-cyan-100 text-cyan-800',
+    other: 'bg-gray-100 text-gray-800'
+  };
+  return colors[category];
+};
+
 const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<WikipediaSearchResult[]>([]);
@@ -56,7 +71,7 @@ const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel })
   }, [debouncedQuery]);
 
   const handleSelectDevice = (device: WikipediaSearchResult) => {
-    onSelectDevice(device, selectedCategory);
+    onSelectDevice(device, device.category);
   };
 
   return (
@@ -70,21 +85,6 @@ const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel })
           >
             <X size={20} />
           </button>
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Device Category</label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as DeviceCategory)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {deviceCategories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
         </div>
         
         <div className="relative mb-4">
@@ -130,7 +130,12 @@ const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel })
                   />
                 )}
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{result.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-gray-900">{result.title}</h3>
+                    <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(result.category)}`}>
+                      {deviceCategories.find(c => c.value === result.category)?.label}
+                    </span>
+                  </div>
                   <p className="text-sm text-gray-600 line-clamp-2">{result.description}</p>
                 </div>
               </div>

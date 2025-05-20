@@ -1,4 +1,4 @@
-import { WikipediaSearchResult } from '../types/types';
+import { WikipediaSearchResult, DeviceCategory } from '../types/types';
 
 // Wikipedia API endpoints
 const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/api/rest_v1';
@@ -30,6 +30,32 @@ const extractYearFromText = (text: string): number | null => {
   return null;
 };
 
+const detectDeviceCategory = (title: string, description: string): DeviceCategory => {
+  const text = (title + ' ' + description).toLowerCase();
+  
+  // Define category keywords
+  const categoryKeywords: Record<DeviceCategory, string[]> = {
+    smartphone: ['smartphone', 'mobile phone', 'iphone', 'android phone', 'cell phone'],
+    laptop: ['laptop', 'notebook', 'macbook', 'ultrabook'],
+    desktop: ['desktop computer', 'pc', 'personal computer', 'workstation'],
+    tablet: ['tablet', 'ipad', 'android tablet'],
+    smartwatch: ['smartwatch', 'smart watch', 'apple watch', 'wearable'],
+    gaming: ['game console', 'gaming console', 'playstation', 'xbox', 'nintendo'],
+    audio: ['headphones', 'earbuds', 'speaker', 'sound system', 'audio device'],
+    camera: ['camera', 'digital camera', 'dslr', 'mirrorless'],
+    other: []
+  };
+
+  // Check each category's keywords
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      return category as DeviceCategory;
+    }
+  }
+
+  return 'other';
+};
+
 export const searchWikipedia = async (query: string): Promise<WikipediaSearchResult[]> => {
   try {
     // Use the action API with origin=* for CORS support
@@ -56,13 +82,18 @@ export const searchWikipedia = async (query: string): Promise<WikipediaSearchRes
       return [];
     }
 
-    return Object.values(data.query.pages).map((page: any) => ({
-      title: page.title,
-      description: page.extract || 'No description available',
-      imageUrl: page.thumbnail ? page.thumbnail.source : '', 
-      wikiUrl: page.fullurl,
-      releaseYear: extractYearFromText(page.extract || '')
-    })) as WikipediaSearchResult[];
+    return Object.values(data.query.pages).map((page: any) => {
+      const title = page.title;
+      const description = page.extract || 'No description available';
+      return {
+        title,
+        description,
+        imageUrl: page.thumbnail ? page.thumbnail.source : '', 
+        wikiUrl: page.fullurl,
+        releaseYear: extractYearFromText(description),
+        category: detectDeviceCategory(title, description)
+      };
+    }) as WikipediaSearchResult[];
   } catch (error) {
     console.error('Error fetching from Wikipedia:', error);
     return [];
