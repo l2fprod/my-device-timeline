@@ -94,7 +94,7 @@ const Timeline: React.FC<TimelineProps> = ({
         {/* Vertical timeline line */}
         <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-blue-200"></div>
         
-        <div className="space-y-16">
+        <div className="space-y-8">
           {years.map(year => (
             <div key={year} className="relative">
               {/* Year label */}
@@ -119,7 +119,7 @@ const Timeline: React.FC<TimelineProps> = ({
                   return (
                     <div
                       key={device.id}
-                      className={`relative ${isLeft ? 'col-start-1' : 'col-start-2'} ${isConsecutiveOnSameSide ? 'mt-12' : 'mt-4'}`}
+                      className={`relative ${isLeft ? 'col-start-1' : 'col-start-2'} ${isConsecutiveOnSameSide ? 'mt-6' : 'mt-4'}`}
                     >
                       {/* Connector line */}
                       <div 
