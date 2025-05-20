@@ -128,7 +128,6 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
                 className="text-sm sm:text-sm text-base font-medium text-blue-600 hover:text-blue-700 sm:truncate flex items-center break-words sm:break-normal"
               >
                 {device.name}
-                <ExternalLink size={10} className="ml-1 flex-shrink-0" />
               </a>
             ) : (
               <h3 className="text-sm sm:text-sm text-base font-medium text-gray-900 sm:truncate break-words sm:break-normal">{device.name}</h3>
