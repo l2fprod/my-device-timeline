@@ -19,7 +19,9 @@ function App() {
 
   // Save devices to localStorage whenever they change
   useEffect(() => {
-    saveDevices(devices);
+    if (devices.length > 0) {
+      saveDevices(devices);
+    }
   }, [devices]);
 
   const handleAddDevice = () => {
