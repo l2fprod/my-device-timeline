@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Device } from '../types/types';
 import { formatForLinkedIn, copyToClipboard, exportAsImage } from '../utils/exportUtils';
+import { formatTimeRange } from '../utils/dateUtils';
+import { getDeviceImageFallback } from '../services/wikipediaService';
+import { getCategoryColor } from '../utils/categoryUtils';
 import { X, Copy, CheckCircle, Image, FileText } from 'lucide-react';
 
 interface ExportModalProps {
@@ -139,13 +142,33 @@ const ExportModal: React.FC<ExportModalProps> = ({ devices, onClose }) => {
                       </div>
                       <div className="h-1 bg-blue-200 flex-grow ml-4"></div>
                     </div>
-                    <div className="ml-16 space-y-3">
+                    <div className="ml-16 grid grid-cols-1 md:grid-cols-2 gap-4">
                       {yearDevices.map(device => (
-                        <div key={device.id} className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-medium text-gray-900">{device.name}</h3>
-                          {device.notes && (
-                            <p className="text-sm text-gray-600 mt-1">{device.notes}</p>
-                          )}
+                        <div key={device.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="relative h-32 bg-gray-100">
+                            <img 
+                              src={device.imageUrl || getDeviceImageFallback(device.category)} 
+                              alt={device.name}
+                              className="absolute inset-0 w-full h-full object-contain p-2"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = getDeviceImageFallback(device.category);
+                              }}
+                            />
+                          </div>
+                          <div className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{device.name}</h3>
+                                <span className="text-sm text-gray-600">{formatTimeRange(device.startYear, device.endYear)}</span>
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(device.category)}`}>
+                                {device.category.charAt(0).toUpperCase() + device.category.slice(1)}
+                              </span>
+                            </div>
+                            {device.notes && (
+                              <p className="text-sm text-gray-700 mt-2">{device.notes}</p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
