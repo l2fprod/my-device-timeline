@@ -125,15 +125,15 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
                 href={device.wikiUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 truncate flex items-center"
+                className="text-sm sm:text-sm text-base font-medium text-blue-600 hover:text-blue-700 sm:truncate flex items-center break-words sm:break-normal"
               >
                 {device.name}
-                <ExternalLink size={10} className="ml-1" />
+                <ExternalLink size={10} className="ml-1 flex-shrink-0" />
               </a>
             ) : (
-              <h3 className="text-sm font-medium text-gray-900 truncate">{device.name}</h3>
+              <h3 className="text-sm sm:text-sm text-base font-medium text-gray-900 sm:truncate break-words sm:break-normal">{device.name}</h3>
             )}
-            <div className="flex space-x-1 ml-2">
+            <div className="flex space-x-1 ml-2 flex-shrink-0">
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-1 text-gray-400 hover:text-gray-600"
