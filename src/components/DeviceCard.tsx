@@ -115,7 +115,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
             src={device.imageUrl}
             alt={device.name}
             onError={handleImageError}
-            className="w-full h-full object-contain p-1"
+            className="w-full h-full object-cover p-1"
           />
         </div>
         <div className="flex-1 p-2 min-w-0">
