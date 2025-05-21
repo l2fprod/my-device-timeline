@@ -6,7 +6,7 @@ import VideoExport from './components/VideoExport';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
 import { Monitor, Plus, History, Linkedin, Image } from 'lucide-react';
-import { formatForLinkedIn, copyToClipboard, exportAsImage } from './utils/exportUtils';
+import { formatForLinkedIn, copyToClipboard, exportAsImage, exportAsLinkedInImage } from './utils/exportUtils';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -76,9 +76,7 @@ function App() {
   };
 
   const handleDownloadImage = async () => {
-    if (timelineRef.current) {
-      await exportAsImage(timelineRef.current, 'tech-timeline.png');
-    }
+    await exportAsLinkedInImage(devices, 'tech-timeline.png');
   };
 
   return (
