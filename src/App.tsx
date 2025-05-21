@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Device, WikipediaSearchResult, DeviceCategory } from './types/types';
 import Timeline from './components/Timeline';
 import DeviceSearch from './components/DeviceSearch';
+import VideoExport from './components/VideoExport';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
 import { Monitor, Plus, History, Linkedin, Image } from 'lucide-react';
@@ -118,6 +119,7 @@ function App() {
                 <Image size={16} className="mr-2" />
                 Download Image
               </button>
+              <VideoExport devices={devices} onClose={() => {}} />
             </div>
           </div>
         </div>
