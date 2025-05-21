@@ -87,7 +87,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Monitor className="h-8 w-8 text-blue-600" />
+              <img src="/favicon.svg" alt="TechTimeline" className="h-8 w-8" />
               <h1 className="ml-2 text-xl font-semibold text-gray-900">TechTimeline</h1>
             </div>
             <div className="flex items-center space-x-4">

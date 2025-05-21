@@ -113,16 +113,37 @@ const VideoExport: React.FC<VideoExportProps> = ({ devices, onClose }) => {
     setProgress(0);
 
     try {
-      console.log("Loading JSZip...");
-      const JSZip = (await import('jszip')).default;
-      const zip = new JSZip();
-      console.log("JSZip loaded successfully");
-
       // Sort devices by start year (most recent first)
       const sortedDevices = [...devices].sort((a, b) => b.startYear - a.startYear);
       console.log("Devices sorted by year:", sortedDevices.map(d => d.name));
 
-      // Generate images for each device
+      // Create a MediaRecorder
+      const stream = canvasRef.current.captureStream(30); // 30 FPS
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 5000000 // 5 Mbps
+      });
+
+      const chunks: Blob[] = [];
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tech-timeline.webm';
+        document.body.appendChild(a);
+        console.log("Starting download...");
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log("Download completed");
+      };
+
+      // Start recording
+      mediaRecorder.start();
+
+      // Generate frames for each device
       for (let i = 0; i < sortedDevices.length; i++) {
         console.log(`Processing device ${i + 1}/${sortedDevices.length}:`, sortedDevices[i].name);
         
@@ -211,11 +232,8 @@ const VideoExport: React.FC<VideoExportProps> = ({ devices, onClose }) => {
           }
         }
 
-        // Add image to zip
-        console.log("Converting canvas to PNG for:", device.name);
-        const imageData = canvas.toDataURL('image/png').split(',')[1];
-        zip.file(`slide_${i.toString().padStart(3, '0')}.png`, imageData, { base64: true });
-        console.log("Added slide to zip:", device.name);
+        // Wait for 500ms to record this frame
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Update progress
         const newProgress = Math.round(((i + 1) / sortedDevices.length) * 100);
@@ -223,20 +241,8 @@ const VideoExport: React.FC<VideoExportProps> = ({ devices, onClose }) => {
         setProgress(newProgress);
       }
 
-      console.log("Generating zip file...");
-      const content = await zip.generateAsync({ type: 'blob' });
-      console.log("Zip file generated, size:", content.size, "bytes");
-
-      const url = URL.createObjectURL(content);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tech-timeline-slides.zip';
-      document.body.appendChild(a);
-      console.log("Starting download...");
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      console.log("Download completed");
+      // Stop recording after all frames are captured
+      mediaRecorder.stop();
     } catch (error) {
       console.error("Error during video export:", error);
     } finally {
