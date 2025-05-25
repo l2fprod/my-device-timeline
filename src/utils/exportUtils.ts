@@ -69,188 +69,208 @@ export const exportAsImage = async (element: HTMLElement, fileName: string): Pro
 
 export const exportAsLinkedInImage = async (devices: Device[], fileName: string = 'tech-timeline.png'): Promise<void> => {
   try {
-    // Create a temporary container for the timeline
-    const container = document.createElement('div');
-    container.style.width = '1080px';
-    container.style.height = '1080px';
-    container.style.background = 'linear-gradient(to bottom right, #eef2ff, #ffffff, #faf5ff)'; // from-indigo-50 via-white to-purple-50
-    container.style.padding = '40px';
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    document.body.appendChild(container);
+    // Card and layout settings
+    const cardWidth = 220;
+    const cardHeight = 280;
+    const cardGapX = 32;
+    const cardGapY = 48;
+    const imageWidth = 1080;
+    const margin = 40;
+    const zigzagOffset = 40; // vertical offset for zig-zag
 
     // Sort devices by year (oldest first)
     const sortedDevices = [...devices].sort((a, b) => a.startYear - b.startYear);
+    const numCardsPerRow = Math.max(1, Math.floor((imageWidth - margin * 2 + cardGapX) / (cardWidth + cardGapX)));
+    const numRows = Math.ceil(sortedDevices.length / numCardsPerRow);
+    const imageHeight = margin * 2 + numRows * cardHeight + (numRows - 1) * cardGapY + zigzagOffset;
 
-    // Create header
-    const header = document.createElement('div');
-    header.style.textAlign = 'center';
-    header.style.marginBottom = '40px';
-    header.innerHTML = `
-      <h1 style="font-family: 'Arial', sans-serif; font-size: 48px; color: #1a1a1a; margin: 0;">
-        My Technology Journey
-      </h1>
-      <p style="font-family: 'Arial', sans-serif; font-size: 24px; color: #666; margin: 10px 0 0;">
-        ${sortedDevices.length} devices and counting
-      </p>
-    `;
-    container.appendChild(header);
+    // Create container
+    const container = document.createElement('div');
+    container.style.width = `${imageWidth}px`;
+    container.style.height = `${imageHeight}px`;
+    container.style.background = 'linear-gradient(to bottom right, #eef2ff, #ffffff, #faf5ff)';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.padding = '0';
+    document.body.appendChild(container);
 
-    // Create timeline grid
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    
-    // Calculate optimal grid layout based on number of devices
-    const numDevices = sortedDevices.length;
-    let gridCols = 2;
-    let cardHeight = '180px';
-    let cardPadding = '15px';
-    let imageHeight = '60%';
-    let titleFontSize = '14px';
-    let yearFontSize = '12px';
-    
-    // Adjust grid layout based on number of devices
-    if (numDevices <= 4) {
-      gridCols = 2;
-      cardHeight = '240px';
-      cardPadding = '20px';
-      imageHeight = '70%';
-      titleFontSize = '16px';
-      yearFontSize = '14px';
-    } else if (numDevices <= 9) {
-      gridCols = 3;
-      cardHeight = '200px';
-      cardPadding = '15px';
-      imageHeight = '65%';
-      titleFontSize = '15px';
-      yearFontSize = '13px';
-    } else if (numDevices <= 16) {
-      gridCols = 4;
-      cardHeight = '180px';
-      cardPadding = '12px';
-      imageHeight = '60%';
-      titleFontSize = '14px';
-      yearFontSize = '12px';
-    } else {
-      gridCols = 5;
-      cardHeight = '160px';
-      cardPadding = '10px';
-      imageHeight = '55%';
-      titleFontSize = '13px';
-      yearFontSize = '11px';
+    function getCardColors(seed: string) {
+      // Simple hash to pick a color pair from a palette
+      const palette = [
+        ['#ffb347', '#ffcc33'], // orange-yellow
+        ['#6dd5ed', '#2193b0'], // blue-cyan
+        ['#f7971e', '#ffd200'], // orange-gold
+        ['#f953c6', '#b91d73'], // pink-purple
+        ['#43cea2', '#185a9d'], // green-blue
+        ['#ff6e7f', '#bfe9ff'], // pink-lightblue
+        ['#f7797d', '#FBD786'], // red-yellow
+        ['#c471f5', '#fa71cd'], // purple-pink
+        ['#30cfd0', '#330867'], // teal-indigo
+        ['#f857a6', '#ff5858'], // magenta-red
+      ];
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % palette.length;
+      return palette[Math.abs(hash) % palette.length];
     }
-    
-    grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
-    grid.style.gap = '15px';
-    grid.style.overflow = 'hidden';
-    grid.style.maxHeight = '900px'; // Increased to use more vertical space
-    grid.style.overflowY = 'auto';
-    container.appendChild(grid);
 
-    // Add devices to grid
-    sortedDevices.forEach(device => {
-      const deviceCard = document.createElement('div');
-      deviceCard.style.backgroundColor = '#f8f9fa';
-      deviceCard.style.borderRadius = '12px';
-      deviceCard.style.padding = cardPadding;
-      deviceCard.style.display = 'flex';
-      deviceCard.style.flexDirection = 'column';
-      deviceCard.style.gap = '8px';
-      deviceCard.style.height = cardHeight;
-      deviceCard.style.overflow = 'hidden';
+    // Add cards in zig-zag, wrapping layout
+    sortedDevices.forEach((device, i) => {
+      const row = Math.floor(i / numCardsPerRow);
+      const col = i % numCardsPerRow;
+      const zigzag = (col % 2 === 0) ? 0 : zigzagOffset;
+      const left = margin + col * (cardWidth + cardGapX);
+      const top = margin + row * (cardHeight + cardGapY) + zigzag;
 
-      // Device image
+      // Get unique colors for this card
+      const [color1, color2] = getCardColors(`${device.startYear}${device.name}`);
+
+      const card = document.createElement('div');
+      card.style.position = 'absolute';
+      card.style.left = `${left}px`;
+      card.style.top = `${top}px`;
+      card.style.width = `${cardWidth}px`;
+      card.style.height = `${cardHeight}px`;
+      card.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+      card.style.borderRadius = '28px';
+      card.style.boxShadow = `0 8px 32px 0 ${color1}55, 0 2px 8px 0 #0002`;
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.alignItems = 'center';
+      card.style.justifyContent = 'flex-start';
+      card.style.padding = '0';
+      card.style.overflow = 'hidden';
+      card.style.gap = '0';
+      card.style.border = `4px solid #fff8`;
+      card.style.position = 'absolute';
+
+      // Title area: year as background watermark, device name on top
+      const titleArea = document.createElement('div');
+      titleArea.style.position = 'relative';
+      titleArea.style.width = '100%';
+      titleArea.style.height = '60px';
+      titleArea.style.display = 'flex';
+      titleArea.style.flexDirection = 'column';
+      titleArea.style.alignItems = 'center';
+      titleArea.style.justifyContent = 'center';
+      // titleArea.style.marginBottom = '4px';
+      titleArea.style.overflow = 'hidden';
+      // titleArea.style.padding = '0 4px';
+
+      // Year (background watermark)
+      const year = document.createElement('div');
+      year.textContent = device.startYear.toString();
+      year.style.position = 'absolute';
+      year.style.top = '-20px';
+      year.style.left = '0';
+      year.style.width = '100%';
+      year.style.height = '100%';
+      year.style.fontFamily = 'Arial Black, Arial, sans-serif';
+      year.style.fontSize = '60px';
+      year.style.fontWeight = 'bold';
+      year.style.color = 'rgba(255,255,255,0.22)';
+      year.style.textAlign = 'center';
+      year.style.letterSpacing = '2px';
+      year.style.lineHeight = '60px';
+      year.style.userSelect = 'none';
+      year.style.pointerEvents = 'none';
+      year.style.textShadow = '0 2px 8px #0002';
+      titleArea.appendChild(year);
+
+      // Device name (on top)
+      const name = document.createElement('div');
+      name.textContent = device.name;
+      name.style.marginTop = '10px';
+      name.style.position = 'relative';
+      name.style.fontFamily = 'Arial Black, Arial, sans-serif';
+      name.style.fontSize = '18px';
+      name.style.fontWeight = 'bold';
+      name.style.color = '#fff';
+      name.style.textAlign = 'center';
+      name.style.overflow = 'hidden';
+      name.style.textOverflow = 'ellipsis';
+      name.style.display = '-webkit-box';
+      name.style.webkitLineClamp = '2';
+      name.style.webkitBoxOrient = 'vertical';
+      name.style.width = '100%';
+      name.style.zIndex = '2';
+      name.style.textShadow = '0 2px 8px #0008, 0 1px 0 #fff8';
+      name.style.lineHeight = '60px';
+      titleArea.appendChild(name);
+
+      card.appendChild(titleArea);
+
+      // Image with glow
       const imgContainer = document.createElement('div');
-      imgContainer.style.width = '100%';
-      imgContainer.style.height = imageHeight;
+      imgContainer.style.width = 'calc(100% - 20px)';
+      imgContainer.style.height = '100px';
       imgContainer.style.display = 'flex';
       imgContainer.style.alignItems = 'center';
       imgContainer.style.justifyContent = 'center';
-      imgContainer.style.backgroundColor = '#ffffff';
-      imgContainer.style.borderRadius = '8px';
-      imgContainer.style.overflow = 'hidden';
+      imgContainer.style.background = 'rgba(255,255,255,0.25)';
+      imgContainer.style.borderRadius = '10px';
       imgContainer.style.position = 'relative';
+      imgContainer.style.boxShadow = `0 0 24px 0 ${color2}55`;
+      imgContainer.style.marginTop = '15px';
 
       const img = document.createElement('img');
       img.src = device.imageUrl;
-      img.style.position = 'absolute';
-      img.style.top = '50%';
-      img.style.left = '50%';
-      img.style.transform = 'translate(-50%, -50%)';
-      img.style.maxWidth = '90%';
-      img.style.maxHeight = '90%';
+      img.alt = device.name;
+      img.style.maxWidth = '80%';
+      img.style.maxHeight = '90px';
       img.style.width = 'auto';
       img.style.height = 'auto';
       img.style.objectFit = 'contain';
-      img.onload = () => {
-        // Adjust image size after load to maintain aspect ratio
-        const aspectRatio = img.naturalWidth / img.naturalHeight;
-        if (aspectRatio > 1) {
-          // Image is wider than tall
-          img.style.width = '90%';
-          img.style.height = 'auto';
-        } else {
-          // Image is taller than wide
-          img.style.width = 'auto';
-          img.style.height = '90%';
-        }
-      };
+      img.style.borderRadius = '12px';
+      img.style.boxShadow = `0 0 16px 0 ${color1}55`;
       imgContainer.appendChild(img);
+      card.appendChild(imgContainer);
 
-      // Device info
-      const info = document.createElement('div');
-      info.style.flex = '1';
-      info.style.display = 'flex';
-      info.style.flexDirection = 'column';
-      info.style.gap = '4px';
-      info.style.minHeight = '0';
-      info.style.padding = '4px 0';
+      // Notes area (like a Pokémon card description box)
+      if (device.notes) {
+        const notes = document.createElement('div');
+        notes.textContent = device.notes;
+        notes.style.fontFamily = 'Comic Sans MS, Comic Sans, Arial, sans-serif';
+        notes.style.fontSize = '13px';
+        notes.style.color = '#222';
+        notes.style.background = `linear-gradient(90deg, #fffbe7 0%, #ffe6fa 100%)`;
+        notes.style.borderRadius = '10px';
+        notes.style.padding = '8px 10px';
+        notes.style.margin = '8px 8px 10px 8px';
+        notes.style.maxHeight = '40px';
+        notes.style.overflow = 'hidden';
+        notes.style.textOverflow = 'ellipsis';
+        notes.style.display = '-webkit-box';
+        notes.style.webkitLineClamp = '2';
+        notes.style.webkitBoxOrient = 'vertical';
+        notes.style.width = 'calc(100% - 20px)';
+        notes.style.boxShadow = `0 1px 6px 0 #0001`;
+        notes.style.textAlign = 'center';
+        card.appendChild(notes);
+      }
 
-      const year = document.createElement('div');
-      year.style.fontFamily = 'Arial, sans-serif';
-      year.style.fontSize = yearFontSize;
-      year.style.color = '#666';
-      year.textContent = device.startYear.toString();
+      // Optional: sparkle overlay
+      const sparkle = document.createElement('div');
+      sparkle.style.position = 'absolute';
+      sparkle.style.left = '0';
+      sparkle.style.top = '0';
+      sparkle.style.width = '100%';
+      sparkle.style.height = '100%';
+      sparkle.style.pointerEvents = 'none';
+      sparkle.style.background = 'repeating-linear-gradient(135deg,rgba(255,255,255,0.08) 0 2px,transparent 2px 8px)';
+      sparkle.style.borderRadius = '28px';
+      card.appendChild(sparkle);
 
-      const name = document.createElement('div');
-      name.style.fontFamily = 'Arial, sans-serif';
-      name.style.fontSize = titleFontSize;
-      name.style.fontWeight = 'bold';
-      name.style.color = '#1a1a1a';
-      name.style.whiteSpace = 'nowrap';
-      name.style.overflow = 'hidden';
-      name.style.textOverflow = 'ellipsis';
-      name.style.lineHeight = '1.2';
-      name.textContent = device.name;
-
-      info.appendChild(year);
-      info.appendChild(name);
-      deviceCard.appendChild(imgContainer);
-      deviceCard.appendChild(info);
-      grid.appendChild(deviceCard);
+      container.appendChild(card);
     });
-
-    // Add footer with adjusted spacing
-    const footer = document.createElement('div');
-    footer.style.textAlign = 'center';
-    footer.style.marginTop = '15px';
-    footer.style.paddingTop = '12px';
-    footer.style.borderTop = '1px solid #eee';
-    footer.innerHTML = `
-      <p style="font-family: 'Arial', sans-serif; font-size: 16px; color: #666; margin: 0;">
-        #TechJourney #Technology #ProfessionalDevelopment
-      </p>
-    `;
-    container.appendChild(footer);
 
     // Generate image
     const canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
-      scale: 2, // Higher quality
+      scale: 2,
       logging: false,
       useCORS: true,
-      width: 1080,
-      height: 1080
+      width: imageWidth,
+      height: imageHeight
     });
 
     // Clean up
