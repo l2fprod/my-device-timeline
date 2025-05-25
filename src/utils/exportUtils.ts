@@ -48,24 +48,48 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 
 export const exportAsLinkedInImage = async (devices: Device[], fileName: string = 'tech-timeline.png'): Promise<void> => {
   try {
-    // Card and layout settings
-    const cardWidth = 220;
-    const cardHeight = 280;
-    const cardGapX = 32;
-    const cardGapY = 48;
-    const imageWidth = 1080;
-    const margin = 40;
-    const zigzagOffset = 40; // vertical offset for zig-zag
+    // Initialize all layout variables
+    const layout = {
+      cardWidth: 220,
+      cardHeight: 280,
+      cardGapX: 32,
+      cardGapY: 48,
+      imageWidth: 1080,
+      margin: 40,
+      zigzagOffset: 40,
+      startX: 0
+    };
 
     // Sort devices by year (oldest first)
     const sortedDevices = [...devices].sort((a, b) => a.startYear - b.startYear);
-    const numCardsPerRow = Math.max(1, Math.floor((imageWidth - margin * 2 + cardGapX) / (cardWidth + cardGapX)));
+    const numCardsPerRow = Math.max(1, Math.floor((layout.imageWidth - layout.margin * 2 + layout.cardGapX) / (layout.cardWidth + layout.cardGapX)));
     const numRows = Math.ceil(sortedDevices.length / numCardsPerRow);
-    const imageHeight = margin * 2 + numRows * cardHeight + (numRows - 1) * cardGapY + zigzagOffset;
+    // Add extra space at the bottom for attribution
+    const attributionHeight = 60;
+    const imageHeight = layout.margin * 2 + numRows * layout.cardHeight + (numRows - 1) * layout.cardGapY + layout.zigzagOffset + attributionHeight;
+
+    // Calculate total width of all cards in a row and center position
+    const totalRowWidth = numCardsPerRow * layout.cardWidth + (numCardsPerRow - 1) * layout.cardGapX;
+    layout.startX = Math.max(0, (layout.imageWidth - totalRowWidth) / 2);
+
+    // Arrange devices in rows with alternating directions
+    const arrangedDevices: Device[] = [];
+    for (let row = 0; row < numRows; row++) {
+      const startIdx = row * numCardsPerRow;
+      const endIdx = Math.min(startIdx + numCardsPerRow, sortedDevices.length);
+      const rowDevices = sortedDevices.slice(startIdx, endIdx);
+      
+      // For odd rows (1-based), reverse the order
+      if (row % 2 === 1) {
+        rowDevices.reverse();
+      }
+      
+      arrangedDevices.push(...rowDevices);
+    }
 
     // Create container
     const container = document.createElement('div');
-    container.style.width = `${imageWidth}px`;
+    container.style.width = `${layout.imageWidth}px`;
     container.style.height = `${imageHeight}px`;
     container.style.background = 'linear-gradient(135deg, #2c3e50 0%, #3498db 25%, #2980b9 50%, #34495e 75%, #2c3e50 100%)';
     container.style.position = 'absolute';
@@ -78,7 +102,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     svgContainer.style.position = 'absolute';
     svgContainer.style.left = '0';
     svgContainer.style.top = '0';
-    svgContainer.style.width = `${imageWidth}px`;
+    svgContainer.style.width = `${layout.imageWidth}px`;
     svgContainer.style.height = `${imageHeight}px`;
     svgContainer.style.pointerEvents = 'none';
     svgContainer.style.zIndex = '1';
@@ -109,7 +133,75 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     });
     
     defs.appendChild(gradient);
+
+    // Add lens flare gradient
+    const flareGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+    flareGradient.setAttribute('id', 'flareGradient');
+    flareGradient.setAttribute('cx', '50%');
+    flareGradient.setAttribute('cy', '50%');
+    flareGradient.setAttribute('r', '50%');
+    
+    const flareColors = [
+      { offset: '0%', color: '#ffffff' },
+      { offset: '50%', color: 'rgba(255,255,255,0.5)' },
+      { offset: '100%', color: 'rgba(255,255,255,0)' }
+    ];
+    
+    flareColors.forEach(({ offset, color }) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', color);
+      flareGradient.appendChild(stop);
+    });
+    
+    defs.appendChild(flareGradient);
     svgContainer.appendChild(defs);
+
+    // Function to create a lens flare
+    function createLensFlare(x: number, y: number, size: number) {
+      const flare = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      flare.setAttribute('cx', x.toString());
+      flare.setAttribute('cy', y.toString());
+      flare.setAttribute('r', size.toString());
+      flare.setAttribute('fill', 'url(#flareGradient)');
+      flare.style.filter = 'blur(2px)';
+      return flare;
+    }
+
+    // Add random lens flares
+    const numFlares = Math.floor(Math.random() * 5) + 3; // 3-7 flares
+    for (let i = 0; i < numFlares; i++) {
+      const x = Math.random() * layout.imageWidth;
+      const y = Math.random() * imageHeight;
+      const size = Math.random() * 100 + 50; // Random size between 50 and 150
+      const flare = createLensFlare(x, y, size);
+      svgContainer.appendChild(flare);
+    }
+
+    // Add website attribution
+    const attribution = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    attribution.setAttribute('x', '50%');
+    attribution.setAttribute('y', `${imageHeight - 20}px`);
+    attribution.setAttribute('text-anchor', 'middle');
+    attribution.setAttribute('fill', 'rgba(255,255,255,0.7)');
+    attribution.setAttribute('font-family', 'Arial, sans-serif');
+    attribution.setAttribute('font-size', '16');
+    attribution.setAttribute('font-weight', 'bold');
+    attribution.textContent = 'Create your own at l2fprod.github.io/my-device-timeline';
+    attribution.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+    svgContainer.appendChild(attribution);
+
+    // Add a subtle glow effect behind the text
+    const textGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    textGlow.setAttribute('x', '50%');
+    textGlow.setAttribute('y', `${imageHeight - 40}px`);
+    textGlow.setAttribute('width', '400');
+    textGlow.setAttribute('height', '30');
+    textGlow.setAttribute('rx', '15');
+    textGlow.setAttribute('fill', 'rgba(0,0,0,0.2)');
+    textGlow.setAttribute('transform', 'translate(-200, -15)');
+    textGlow.style.filter = 'blur(10px)';
+    svgContainer.appendChild(textGlow);
 
     function getCardColors(seed: string) {
       // Simple hash to pick a color pair from a palette
@@ -130,28 +222,13 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       return palette[Math.abs(hash) % palette.length];
     }
 
-    // Arrange devices in rows with alternating directions
-    const arrangedDevices: Device[] = [];
-    for (let row = 0; row < numRows; row++) {
-      const startIdx = row * numCardsPerRow;
-      const endIdx = Math.min(startIdx + numCardsPerRow, sortedDevices.length);
-      const rowDevices = sortedDevices.slice(startIdx, endIdx);
-      
-      // For odd rows (1-based), reverse the order
-      if (row % 2 === 1) {
-        rowDevices.reverse();
-      }
-      
-      arrangedDevices.push(...rowDevices);
-    }
-
     // Add cards in the arranged order
     arrangedDevices.forEach((device, i) => {
       const row = Math.floor(i / numCardsPerRow);
       const col = i % numCardsPerRow;
-      const zigzag = (col % 2 === 0) ? 0 : zigzagOffset;
-      const left = margin + col * (cardWidth + cardGapX);
-      const top = margin + row * (cardHeight + cardGapY) + zigzag;
+      const zigzag = (col % 2 === 0) ? 0 : layout.zigzagOffset;
+      const left = layout.startX + col * (layout.cardWidth + layout.cardGapX);
+      const top = layout.margin + row * (layout.cardHeight + layout.cardGapY) + zigzag;
 
       // Get unique colors for this card
       const [color1, color2] = getCardColors(`${device.startYear}${device.name}`);
@@ -160,8 +237,8 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       card.style.position = 'absolute';
       card.style.left = `${left}px`;
       card.style.top = `${top}px`;
-      card.style.width = `${cardWidth}px`;
-      card.style.height = `${cardHeight}px`;
+      card.style.width = `${layout.cardWidth}px`;
+      card.style.height = `${layout.cardHeight}px`;
       card.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
       card.style.borderRadius = '28px';
       card.style.borderBottomLeftRadius = '10px';
@@ -311,9 +388,9 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       if (i < arrangedDevices.length - 1) {
         const nextRow = Math.floor((i + 1) / numCardsPerRow);
         const nextCol = (i + 1) % numCardsPerRow;
-        const nextZigzag = (nextCol % 2 === 0) ? 0 : zigzagOffset;
-        const nextLeft = margin + nextCol * (cardWidth + cardGapX);
-        const nextTop = margin + nextRow * (cardHeight + cardGapY) + nextZigzag;
+        const nextZigzag = (nextCol % 2 === 0) ? 0 : layout.zigzagOffset;
+        const nextLeft = layout.startX + nextCol * (layout.cardWidth + layout.cardGapX);
+        const nextTop = layout.margin + nextRow * (layout.cardHeight + layout.cardGapY) + nextZigzag;
 
         // Calculate start and end points based on position
         let startX, startY, endX, endY;
@@ -327,29 +404,29 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         if (isLastInRow && !isLastRow && row % 2 === 0) {
           // Last card in an odd row (except last row) - connect to the last card of next row
           const nextLastCol = numCardsPerRow - 1;
-          const nextLastLeft = margin + nextLastCol * (cardWidth + cardGapX);
-          const nextLastTop = margin + (row + 1) * (cardHeight + cardGapY) + ((nextLastCol % 2 === 0) ? 0 : zigzagOffset);
+          const nextLastLeft = layout.startX + nextLastCol * (layout.cardWidth + layout.cardGapX);
+          const nextLastTop = layout.margin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextLastCol % 2 === 0) ? 0 : layout.zigzagOffset);
           
-          startX = left + cardWidth / 2;
-          startY = top + cardHeight;
-          endX = nextLastLeft + cardWidth / 2;
+          startX = left + layout.cardWidth / 2;
+          startY = top + layout.cardHeight;
+          endX = nextLastLeft + layout.cardWidth / 2;
           endY = nextLastTop;
         } else if (isFirstInRow && !isFirstRow && row % 2 === 1) {
           // First card in an even row (except first row) - connect to the first card of next row
           const nextFirstCol = 0;
-          const nextFirstLeft = margin + nextFirstCol * (cardWidth + cardGapX);
-          const nextFirstTop = margin + (row + 1) * (cardHeight + cardGapY) + ((nextFirstCol % 2 === 0) ? 0 : zigzagOffset);
+          const nextFirstLeft = layout.startX + nextFirstCol * (layout.cardWidth + layout.cardGapX);
+          const nextFirstTop = layout.margin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextFirstCol % 2 === 0) ? 0 : layout.zigzagOffset);
           
-          startX = left + cardWidth / 2;
-          startY = top + cardHeight;
-          endX = nextFirstLeft + cardWidth / 2;
+          startX = left + layout.cardWidth / 2;
+          startY = top + layout.cardHeight;
+          endX = nextFirstLeft + layout.cardWidth / 2;
           endY = nextFirstTop;
         } else if (col < numCardsPerRow - 1) {
           // Same row - connect right to left
-          startX = left + cardWidth;
-          startY = top + cardHeight / 2;
+          startX = left + layout.cardWidth;
+          startY = top + layout.cardHeight / 2;
           endX = nextLeft;
-          endY = nextTop + cardHeight / 2;
+          endY = nextTop + layout.cardHeight / 2;
         } else {
           // Skip connection for last card of odd rows and even rows
           return;
@@ -361,14 +438,14 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         if ((isLastInRow && !isLastRow) || (isFirstInRow && !isFirstRow)) {
           // Vertical connection for row transitions
           pathData = `M ${startX} ${startY} 
-                     C ${startX} ${startY + cardGapY/2},
-                       ${endX} ${endY - cardGapY/2},
+                     C ${startX} ${startY + layout.cardGapY/2},
+                       ${endX} ${endY - layout.cardGapY/2},
                        ${endX} ${endY}`;
         } else {
           // Horizontal connection for same row
           pathData = `M ${startX} ${startY} 
-                     C ${startX + cardGapX/2} ${startY},
-                       ${endX - cardGapX/2} ${endY},
+                     C ${startX + layout.cardGapX/2} ${startY},
+                       ${endX - layout.cardGapX/2} ${endY},
                        ${endX} ${endY}`;
         }
 
@@ -412,13 +489,13 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
 
         // For first card of even rows, also create a connection to the next card in the same row
         if (isFirstInRow && row % 2 === 1 && !isLastRow) {
-          const nextCardLeft = margin + (col + 1) * (cardWidth + cardGapX);
+          const nextCardLeft = startX + (col + 1) * (layout.cardWidth + layout.cardGapX);
           const nextCardTop = top; // Same row, so same top position
 
-          const horizontalPathData = `M ${left + cardWidth} ${top + cardHeight / 2} 
-                                    C ${left + cardWidth + cardGapX/2} ${top + cardHeight / 2},
-                                      ${nextCardLeft - cardGapX/2} ${nextCardTop + cardHeight / 2},
-                                      ${nextCardLeft} ${nextCardTop + cardHeight / 2}`;
+          const horizontalPathData = `M ${left + layout.cardWidth} ${top + layout.cardHeight / 2} 
+                                    C ${left + layout.cardWidth + layout.cardGapX/2} ${top + layout.cardHeight / 2},
+                                      ${nextCardLeft - layout.cardGapX/2} ${nextCardTop + layout.cardHeight / 2},
+                                      ${nextCardLeft} ${nextCardTop + layout.cardHeight / 2}`;
 
           // Create the main electric cable path
           const horizontalCablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -446,8 +523,8 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
             const t = Math.random(); // Random position along the path
             
             // Calculate position along the path
-            const x = (left + cardWidth) + (nextCardLeft - (left + cardWidth)) * t;
-            const y = top + cardHeight / 2;
+            const x = (left + layout.cardWidth) + (nextCardLeft - (left + layout.cardWidth)) * t;
+            const y = top + layout.cardHeight / 2;
             
             sparkle.setAttribute('cx', x.toString());
             sparkle.setAttribute('cy', y.toString());
@@ -467,7 +544,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       scale: 2,
       logging: false,
       useCORS: true,
-      width: imageWidth,
+      width: layout.imageWidth,
       height: imageHeight
     });
 
