@@ -275,7 +275,8 @@ export const exportAsPDF = async (
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'px',
-      format: [1080, 1080]
+      format: [1080, 1080],
+      compress: true // Enable PDF compression
     });
 
     // Sort devices by year (most recent first)
@@ -340,19 +341,6 @@ export const exportAsPDF = async (
                   ${device.description}
                 </div>
               </div>
-              
-              ${device.wikiUrl ? `
-                <div style="flex: 0 0 auto;">
-                  <h2 style="font-family: 'Arial', sans-serif; font-size: 24px; color: #1a1a1a; margin: 0 0 15px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
-                    Learn More
-                  </h2>
-                  <p style="font-family: 'Arial', sans-serif; font-size: 18px; color: #666; margin: 0;">
-                    <a href="${device.wikiUrl}" style="color: #2563eb; text-decoration: none;">
-                      Read on Wikipedia
-                    </a>
-                  </p>
-                </div>
-              ` : ''}
             </div>
           </div>
         </div>
@@ -393,12 +381,13 @@ export const exportAsPDF = async (
       // Initial resize
       resizeText();
 
-      // Convert the container to canvas
+      // Convert the container to canvas with compression settings
       const canvas = await html2canvas(container, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true, // Enable CORS for images
+        scale: 1.5, // Reduced from 2 for better compression
+        useCORS: true,
         logging: false,
         backgroundColor: null,
+        imageTimeout: 0,
         onclone: (clonedDoc) => {
           // Resize text in the cloned document
           const textContainers = clonedDoc.querySelectorAll('.auto-size-text');
@@ -420,9 +409,11 @@ export const exportAsPDF = async (
         }
       });
 
-      // Add the canvas to the PDF
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, 1080, 1080);
+      // Compress the canvas image data
+      const imgData = canvas.toDataURL('image/jpeg', 0.7); // Use JPEG with 70% quality instead of PNG
+
+      // Add the compressed image to the PDF
+      pdf.addImage(imgData, 'JPEG', 0, 0, 1080, 1080, undefined, 'FAST');
 
       // Remove the temporary container
       document.body.removeChild(container);
@@ -433,7 +424,7 @@ export const exportAsPDF = async (
       }
     }
 
-    // Save the PDF
+    // Save the PDF with compression
     pdf.save('tech-timeline.pdf');
     
     // Set progress to 100% when complete
