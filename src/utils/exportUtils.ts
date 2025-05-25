@@ -73,6 +73,44 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     container.style.padding = '0';
     document.body.appendChild(container);
 
+    // Create a container for all SVG elements
+    const svgContainer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgContainer.style.position = 'absolute';
+    svgContainer.style.left = '0';
+    svgContainer.style.top = '0';
+    svgContainer.style.width = `${imageWidth}px`;
+    svgContainer.style.height = `${imageHeight}px`;
+    svgContainer.style.pointerEvents = 'none';
+    svgContainer.style.zIndex = '1';
+    container.appendChild(svgContainer);
+
+    // Add gradient definition to the SVG container
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.setAttribute('id', 'electricGradient');
+    gradient.setAttribute('x1', '0%');
+    gradient.setAttribute('y1', '0%');
+    gradient.setAttribute('x2', '100%');
+    gradient.setAttribute('y2', '0%');
+    
+    const colors = [
+      { offset: '0%', color: '#4facfe' },
+      { offset: '25%', color: '#00f2fe' },
+      { offset: '50%', color: '#4facfe' },
+      { offset: '75%', color: '#00f2fe' },
+      { offset: '100%', color: '#4facfe' }
+    ];
+    
+    colors.forEach(({ offset, color }) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', color);
+      gradient.appendChild(stop);
+    });
+    
+    defs.appendChild(gradient);
+    svgContainer.appendChild(defs);
+
     function getCardColors(seed: string) {
       // Simple hash to pick a color pair from a palette
       const palette = [
@@ -138,6 +176,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       card.style.gap = '0';
       card.style.border = `4px solid #fff8`;
       card.style.position = 'absolute';
+      card.style.zIndex = '2';
 
       // Title area: year as background watermark, device name on top
       const titleArea = document.createElement('div');
@@ -276,16 +315,6 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         const nextLeft = margin + nextCol * (cardWidth + cardGapX);
         const nextTop = margin + nextRow * (cardHeight + cardGapY) + nextZigzag;
 
-        // Create SVG line
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.style.position = 'absolute';
-        svg.style.left = '0';
-        svg.style.top = '0';
-        svg.style.width = `${imageWidth}px`;
-        svg.style.height = `${imageHeight}px`;
-        svg.style.pointerEvents = 'none';
-        svg.style.zIndex = '1';
-
         // Calculate start and end points based on position
         let startX, startY, endX, endY;
         
@@ -327,7 +356,6 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         }
 
         // Create path
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         let pathData;
         
         if ((isLastInRow && !isLastRow) || (isFirstInRow && !isFirstRow)) {
@@ -360,34 +388,8 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         glowPath.setAttribute('fill', 'none');
         glowPath.style.filter = 'blur(2px)';
 
-        // Add gradient definition
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        gradient.setAttribute('id', 'electricGradient');
-        gradient.setAttribute('x1', '0%');
-        gradient.setAttribute('y1', '0%');
-        gradient.setAttribute('x2', '100%');
-        gradient.setAttribute('y2', '0%');
-        
-        const colors = [
-          { offset: '0%', color: '#4facfe' },
-          { offset: '25%', color: '#00f2fe' },
-          { offset: '50%', color: '#4facfe' },
-          { offset: '75%', color: '#00f2fe' },
-          { offset: '100%', color: '#4facfe' }
-        ];
-        
-        colors.forEach(({ offset, color }) => {
-          const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-          stop.setAttribute('offset', offset);
-          stop.setAttribute('stop-color', color);
-          gradient.appendChild(stop);
-        });
-        
-        defs.appendChild(gradient);
-        svg.appendChild(defs);
-        svg.appendChild(glowPath);
-        svg.appendChild(cablePath);
+        svgContainer.appendChild(glowPath);
+        svgContainer.appendChild(cablePath);
 
         // Add random sparkles along the path
         const numSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
@@ -405,17 +407,14 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
           sparkle.setAttribute('fill', '#ffffff');
           sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
           
-          svg.appendChild(sparkle);
+          svgContainer.appendChild(sparkle);
         }
-
-        container.appendChild(svg);
 
         // For first card of even rows, also create a connection to the next card in the same row
         if (isFirstInRow && row % 2 === 1 && !isLastRow) {
           const nextCardLeft = margin + (col + 1) * (cardWidth + cardGapX);
           const nextCardTop = top; // Same row, so same top position
 
-          const horizontalPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           const horizontalPathData = `M ${left + cardWidth} ${top + cardHeight / 2} 
                                     C ${left + cardWidth + cardGapX/2} ${top + cardHeight / 2},
                                       ${nextCardLeft - cardGapX/2} ${nextCardTop + cardHeight / 2},
@@ -437,11 +436,11 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
           horizontalGlowPath.setAttribute('fill', 'none');
           horizontalGlowPath.style.filter = 'blur(2px)';
 
-          svg.appendChild(horizontalGlowPath);
-          svg.appendChild(horizontalCablePath);
+          svgContainer.appendChild(horizontalGlowPath);
+          svgContainer.appendChild(horizontalCablePath);
 
           // Add random sparkles along the horizontal path
-          const numHorizontalSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
+          const numHorizontalSparkles = Math.floor(Math.random() * 5) + 3;
           for (let i = 0; i < numHorizontalSparkles; i++) {
             const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             const t = Math.random(); // Random position along the path
@@ -456,7 +455,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
             sparkle.setAttribute('fill', '#ffffff');
             sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
             
-            svg.appendChild(sparkle);
+            svgContainer.appendChild(sparkle);
           }
         }
       }
