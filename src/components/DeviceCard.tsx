@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Device, DeviceCategory } from '../types/types';
-import { formatTimeRange } from '../utils/dateUtils';
 import { getYearOptions } from '../utils/dateUtils';
 import { getDeviceImageFallback } from '../services/wikipediaService';
 import { getCategoryColor } from '../utils/categoryUtils';
-import { Edit2, Trash2, Save, X, ExternalLink } from 'lucide-react';
+import { Edit2, Trash2, Save, X } from 'lucide-react';
 
 interface DeviceCardProps {
   device: Device;

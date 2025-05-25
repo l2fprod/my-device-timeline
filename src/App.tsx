@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Device, WikipediaSearchResult, DeviceCategory } from './types/types';
 import Timeline from './components/Timeline';
 import DeviceSearch from './components/DeviceSearch';
-import VideoExport from './components/VideoExport';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Monitor, Plus, History, Linkedin, Image, FileText } from 'lucide-react';
-import { formatForLinkedIn, copyToClipboard, exportAsImage, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
+import { Plus, History, Linkedin, Image, FileText } from 'lucide-react';
+import { formatForLinkedIn, copyToClipboard, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
 import ExportProgressModal from './components/ExportProgressModal';
 
 function App() {
@@ -140,16 +139,15 @@ function App() {
                 className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <Image size={16} className="mr-2 text-purple-500" />
-                Download Image
+                PNG
               </button>
               <button
                 onClick={handleDownloadPDF}
                 className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <FileText size={16} className="mr-2 text-red-500" />
-                Get PDF
+                PDF
               </button>
-              <VideoExport devices={devices} onClose={() => {}} />
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
 import { Device } from '../types/types';
-import { formatTimeRange } from './dateUtils';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -44,26 +43,6 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   } catch (error) {
     console.error('Failed to copy text:', error);
     return false;
-  }
-};
-
-export const exportAsImage = async (element: HTMLElement, fileName: string): Promise<void> => {
-  try {
-    const canvas = await html2canvas(element, {
-      backgroundColor: '#ffffff',
-      scale: 2, // Higher quality
-      logging: false,
-      useCORS: true,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight
-    });
-    
-    const link = document.createElement('a');
-    link.download = fileName;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  } catch (error) {
-    console.error('Failed to export image:', error);
   }
 };
 
@@ -154,9 +133,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       titleArea.style.flexDirection = 'column';
       titleArea.style.alignItems = 'center';
       titleArea.style.justifyContent = 'center';
-      // titleArea.style.marginBottom = '4px';
       titleArea.style.overflow = 'hidden';
-      // titleArea.style.padding = '0 4px';
 
       // Year (background watermark)
       const year = document.createElement('div');

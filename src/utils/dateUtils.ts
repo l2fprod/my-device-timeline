@@ -13,15 +13,3 @@ export const getYearOptions = (): number[] => {
   
   return years;
 };
-
-export const formatTimeRange = (startYear: number, endYear: number | null): string => {
-  if (endYear === null) {
-    return startYear.toString();
-  } 
-  
-  if (startYear === endYear) {
-    return startYear.toString();
-  }
-  
-  return `${startYear} - ${endYear}`;
-};
