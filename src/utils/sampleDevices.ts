@@ -7,7 +7,7 @@ const sampleDevices: Device[] = [
     category: 'desktop',
     startYear: 1982,
     endYear: 1989,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Commodore-64-Computer-FL.jpg/640px-Commodore-64-Computer-FL.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Commodore-64-Computer-FL.jpg/500px-Commodore-64-Computer-FL.jpg',
     description: 'One of the most popular home computers of all time',
     notes: 'My first computer! Learned BASIC programming on this.',
     wikiUrl: 'https://en.wikipedia.org/wiki/Commodore_64'
@@ -18,7 +18,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 1985,
     endYear: 1991,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Nintendo-Entertainment-System-NES-FL.jpg/640px-Nintendo-Entertainment-System-NES-FL.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/NES-Console-Set.png/500px-NES-Console-Set.png',
     description: 'Revolutionary 8-bit home video game console',
     notes: 'Countless hours playing Super Mario Bros and Zelda',
     wikiUrl: 'https://en.wikipedia.org/wiki/Nintendo_Entertainment_System'
@@ -29,7 +29,7 @@ const sampleDevices: Device[] = [
     category: 'desktop',
     startYear: 1990,
     endYear: 1994,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Macintosh_Classic.jpg/640px-Macintosh_Classic.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Macintosh_classic.jpg/500px-Macintosh_classic.jpg',
     description: 'First affordable Macintosh computer',
     notes: 'Used for school work and early desktop publishing',
     wikiUrl: 'https://en.wikipedia.org/wiki/Macintosh_Classic'
@@ -40,7 +40,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 1994,
     endYear: 2000,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/PSX-Console-wController.jpg/640px-PSX-Console-wController.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PlayStation-SCPH-1000-with-Controller.jpg/500px-PlayStation-SCPH-1000-with-Controller.jpg',
     description: 'Revolutionary 32-bit gaming console',
     notes: 'Final Fantasy VII and Metal Gear Solid were amazing!',
     wikiUrl: 'https://en.wikipedia.org/wiki/PlayStation_(console)'
@@ -51,7 +51,7 @@ const sampleDevices: Device[] = [
     category: 'smartphone',
     startYear: 2000,
     endYear: 2003,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Nokia_3310_blue.jpg/640px-Nokia_3310_blue.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Nokia_3310_Blue_R7309170_%28retouch%29.png/330px-Nokia_3310_Blue_R7309170_%28retouch%29.png',
     description: 'Legendary indestructible mobile phone',
     notes: 'Best phone ever made - survived countless drops!',
     wikiUrl: 'https://en.wikipedia.org/wiki/Nokia_3310'
@@ -62,7 +62,7 @@ const sampleDevices: Device[] = [
     category: 'audio',
     startYear: 2001,
     endYear: 2007,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/IPod_classic_5th_generation_black.jpg/640px-IPod_classic_5th_generation_black.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Lightmatter_ipod_1G.jpg',
     description: 'Revolutionary portable music player',
     notes: 'Changed how we listen to music on the go',
     wikiUrl: 'https://en.wikipedia.org/wiki/IPod_Classic'
@@ -73,7 +73,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 2004,
     endYear: 2009,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Nintendo-DS-Fat-Blue.jpg/640px-Nintendo-DS-Fat-Blue.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/BlueSkinnedDS.png/500px-BlueSkinnedDS.png',
     description: 'Innovative dual-screen handheld console',
     notes: 'Great for travel and casual gaming',
     wikiUrl: 'https://en.wikipedia.org/wiki/Nintendo_DS'
@@ -84,7 +84,7 @@ const sampleDevices: Device[] = [
     category: 'smartphone',
     startYear: 2008,
     endYear: 2010,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/IPhone_3G_White.png/640px-IPhone_3G_White.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/IPhone_%26_iPhone_3G.jpg',
     description: 'First iPhone with 3G and App Store',
     notes: 'My first smartphone - changed everything!',
     wikiUrl: 'https://en.wikipedia.org/wiki/IPhone_3G'
@@ -95,7 +95,7 @@ const sampleDevices: Device[] = [
     category: 'tablet',
     startYear: 2010,
     endYear: 2012,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/IPad_1st_generation.png/640px-IPad_1st_generation.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/IPad-WiFi-1stGen.jpg/500px-IPad-WiFi-1stGen.jpg',
     description: 'Revolutionary tablet computer',
     notes: 'Perfect for reading and casual browsing',
     wikiUrl: 'https://en.wikipedia.org/wiki/IPad_(1st_generation)'
@@ -106,7 +106,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 2013,
     endYear: 2020,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/PS4-Console-wDS4.jpg/640px-PS4-Console-wDS4.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/PS4-Console-wDS4.jpg/500px-PS4-Console-wDS4.jpg',
     description: 'Eighth-generation home video game console',
     notes: 'Amazing exclusives like God of War and Spider-Man',
     wikiUrl: 'https://en.wikipedia.org/wiki/PlayStation_4'
@@ -117,21 +117,10 @@ const sampleDevices: Device[] = [
     category: 'laptop',
     startYear: 2020,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/MacBook_Pro_16-inch_%282019%29.png/640px-MacBook_Pro_16-inch_%282019%29.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/M3_Macbook_Pro_14_inch_Space_Grey_model_%28cropped%29.jpg/500px-M3_Macbook_Pro_14_inch_Space_Grey_model_%28cropped%29.jpg',
     description: 'Revolutionary ARM-based laptop',
     notes: 'Incredible performance and battery life',
     wikiUrl: 'https://en.wikipedia.org/wiki/MacBook_Pro'
-  },
-  {
-    id: '12',
-    name: 'Sony WH-1000XM4',
-    category: 'audio',
-    startYear: 2020,
-    endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Sony_WH-1000XM4.jpg/640px-Sony_WH-1000XM4.jpg',
-    description: 'Premium noise-cancelling headphones',
-    notes: 'Best headphones I\'ve ever owned',
-    wikiUrl: 'https://en.wikipedia.org/wiki/Sony_WH-1000XM4'
   },
   {
     id: '13',
@@ -139,7 +128,7 @@ const sampleDevices: Device[] = [
     category: 'smartphone',
     startYear: 2021,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/IPhone_13_Pro_Blue.png/640px-IPhone_13_Pro_Blue.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/IPhone_13_Pro_vector.svg/500px-IPhone_13_Pro_vector.svg.png',
     description: 'Flagship smartphone with Pro camera system',
     notes: 'Amazing camera and battery life',
     wikiUrl: 'https://en.wikipedia.org/wiki/IPhone_13_Pro'
@@ -150,7 +139,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 2021,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Nintendo-Switch-OLED-Model-wJoyCons-Bl.jpg/640px-Nintendo-Switch-OLED-Model-wJoyCons-Bl.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Nintendo_Switch_%E2%80%93_OLED-Modell%2C_Konsole_und_Dock_20230506.png/500px-Nintendo_Switch_%E2%80%93_OLED-Modell%2C_Konsole_und_Dock_20230506.png',
     description: 'Hybrid gaming console with OLED screen',
     notes: 'Perfect for both home and portable gaming',
     wikiUrl: 'https://en.wikipedia.org/wiki/Nintendo_Switch'
@@ -161,7 +150,7 @@ const sampleDevices: Device[] = [
     category: 'camera',
     startYear: 2021,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Sony_Alpha_A7_IV.jpg/640px-Sony_Alpha_A7_IV.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Sony_A7_IV_%28ILCE-7M4%29_-_by_Henry_S%C3%B6derlund_%2851739988735%29.jpg/960px-Sony_A7_IV_%28ILCE-7M4%29_-_by_Henry_S%C3%B6derlund_%2851739988735%29.jpg',
     description: 'Full-frame mirrorless camera',
     notes: 'Incredible photo and video quality',
     wikiUrl: 'https://en.wikipedia.org/wiki/Sony_%CE%B17_IV'
@@ -172,7 +161,7 @@ const sampleDevices: Device[] = [
     category: 'smartwatch',
     startYear: 2021,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Apple_Watch_Series_7.png/640px-Apple_Watch_Series_7.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Apple_Watch_Series_8_Midnight_Aluminium_Case.jpg/500px-Apple_Watch_Series_8_Midnight_Aluminium_Case.jpg',
     description: 'Advanced health and fitness smartwatch',
     notes: 'Great for tracking workouts and notifications',
     wikiUrl: 'https://en.wikipedia.org/wiki/Apple_Watch'
@@ -183,7 +172,7 @@ const sampleDevices: Device[] = [
     category: 'smartphone',
     startYear: 2022,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Samsung_Galaxy_S22_Ultra.png/640px-Samsung_Galaxy_S22_Ultra.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Back_of_the_Samsung_Galaxy_S22.jpg/1920px-Back_of_the_Samsung_Galaxy_S22.jpg',
     description: 'Premium Android smartphone with S Pen',
     notes: 'Excellent camera and display',
     wikiUrl: 'https://en.wikipedia.org/wiki/Samsung_Galaxy_S22'
@@ -194,7 +183,7 @@ const sampleDevices: Device[] = [
     category: 'gaming',
     startYear: 2020,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/PlayStation_5_and_DualSense_with_transparent_background.png/640px-PlayStation_5_and_DualSense_with_transparent_background.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Black_and_white_Playstation_5_base_edition_with_controller.png/500px-Black_and_white_Playstation_5_base_edition_with_controller.png',
     description: 'Next-generation gaming console',
     notes: 'Incredible graphics and fast loading times',
     wikiUrl: 'https://en.wikipedia.org/wiki/PlayStation_5'
@@ -205,7 +194,7 @@ const sampleDevices: Device[] = [
     category: 'tablet',
     startYear: 2022,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/IPad_Pro_12.9-inch_5th_generation.png/640px-IPad_Pro_12.9-inch_5th_generation.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Wikipedia_on_iPad_Pro.jpg/500px-Wikipedia_on_iPad_Pro.jpg',
     description: 'Professional-grade tablet with M2 chip',
     notes: 'Perfect for digital art and productivity',
     wikiUrl: 'https://en.wikipedia.org/wiki/IPad_Pro'
@@ -216,7 +205,7 @@ const sampleDevices: Device[] = [
     category: 'desktop',
     startYear: 2022,
     endYear: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Mac_Studio.png/640px-Mac_Studio.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Mac_Studio_%282022%29_front.jpg/500px-Mac_Studio_%282022%29_front.jpg',
     description: 'Professional desktop computer',
     notes: 'Incredible performance for creative work',
     wikiUrl: 'https://en.wikipedia.org/wiki/Mac_Studio'

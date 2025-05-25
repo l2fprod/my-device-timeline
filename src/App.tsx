@@ -4,7 +4,7 @@ import Timeline from './components/Timeline';
 import DeviceSearch from './components/DeviceSearch';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Plus, History, Linkedin, Image, FileText } from 'lucide-react';
+import { Plus, History, Linkedin, Image, FileText, Trash2 } from 'lucide-react';
 import { formatForLinkedIn, copyToClipboard, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
 import ExportProgressModal from './components/ExportProgressModal';
 
@@ -101,6 +101,13 @@ function App() {
     }
   };
 
+  const handleClearTimeline = () => {
+    if (window.confirm('Are you sure you want to clear your entire timeline? This action cannot be undone.')) {
+      setDevices([]);
+      localStorage.removeItem('device-timeline-data');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100">
@@ -113,13 +120,6 @@ function App() {
               </h1>
             </div>
             <div className="flex items-center space-x-3">
-              <button
-                onClick={handleLoadSampleDevices}
-                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <History size={16} className="mr-2 text-indigo-500" />
-                Load Sample Devices
-              </button>
               <button
                 onClick={handleAddDevice}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -147,6 +147,24 @@ function App() {
               >
                 <FileText size={16} className="mr-2 text-red-500" />
                 PDF
+              </button>
+              <div className="h-6 w-px bg-gray-200 mx-2" />
+              {devices.length > 0 && (
+                <button
+                  onClick={handleClearTimeline}
+                  className="inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  title="Clear Timeline"
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={handleLoadSampleDevices}
+                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <History size={16} className="mr-2 text-indigo-500" />
+                Sample
               </button>
             </div>
           </div>
