@@ -132,6 +132,8 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       card.style.height = `${cardHeight}px`;
       card.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
       card.style.borderRadius = '28px';
+      card.style.borderBottomLeftRadius = '10px';
+      card.style.borderBottomRightRadius = '10px';
       card.style.boxShadow = `0 8px 32px 0 ${color1}55, 0 2px 8px 0 #0002`;
       card.style.display = 'flex';
       card.style.flexDirection = 'column';
@@ -202,7 +204,12 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       // Image with glow
       const imgContainer = document.createElement('div');
       imgContainer.style.width = 'calc(100% - 20px)';
-      imgContainer.style.height = '100px';
+      if (device.notes) {
+        imgContainer.style.height = '100px';
+      } else {
+        imgContainer.style.flex = '1 1 auto';
+        imgContainer.style.marginBottom = '10px';
+      }
       imgContainer.style.display = 'flex';
       imgContainer.style.alignItems = 'center';
       imgContainer.style.justifyContent = 'center';
@@ -216,9 +223,14 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       img.src = device.imageUrl;
       img.alt = device.name;
       img.style.maxWidth = '80%';
-      img.style.maxHeight = '90px';
       img.style.width = 'auto';
       img.style.height = 'auto';
+      if (device.notes) {
+        img.style.minHeight = '90px';
+        img.style.maxHeight = '90px';
+      } else {
+        img.style.maxHeight = '160px';
+      }
       img.style.objectFit = 'contain';
       img.style.borderRadius = '12px';
       img.style.boxShadow = `0 0 16px 0 ${color1}55`;
@@ -229,22 +241,24 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       if (device.notes) {
         const notes = document.createElement('div');
         notes.textContent = device.notes;
-        notes.style.fontFamily = 'Comic Sans MS, Comic Sans, Arial, sans-serif';
+        notes.style.fontFamily = 'Inter, Segoe UI, Arial, sans-serif';
         notes.style.fontSize = '13px';
         notes.style.color = '#222';
-        notes.style.background = `linear-gradient(90deg, #fffbe7 0%, #ffe6fa 100%)`;
+        notes.style.background = 'rgba(255,255,255,0.7)';
         notes.style.borderRadius = '10px';
-        notes.style.padding = '8px 10px';
-        notes.style.margin = '8px 8px 10px 8px';
-        notes.style.maxHeight = '40px';
+        // notes.style.padding = '10px 12px';
+        notes.style.marginTop = '10px';
+        notes.style.flex = '1 1 auto';
         notes.style.overflow = 'hidden';
+        notes.style.maxHeight = '80px';
         notes.style.textOverflow = 'ellipsis';
-        notes.style.display = '-webkit-box';
-        notes.style.webkitLineClamp = '2';
-        notes.style.webkitBoxOrient = 'vertical';
-        notes.style.width = 'calc(100% - 20px)';
+        notes.style.width = 'calc(100% - 16px)';
         notes.style.boxShadow = `0 1px 6px 0 #0001`;
         notes.style.textAlign = 'center';
+        notes.style.display = '-webkit-box';
+        notes.style.webkitLineClamp = '4';
+        notes.style.webkitBoxOrient = 'vertical';
+        notes.style.wordBreak = 'break-word';
         card.appendChild(notes);
       }
 
