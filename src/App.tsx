@@ -133,7 +133,7 @@ function App() {
                 className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <Linkedin size={16} className="mr-2 text-blue-600" />
-                {copied ? 'Copied!' : 'Copy for LinkedIn'}
+                {copied ? 'Copied!' : 'Copy as Text'}
               </button>
               <button
                 onClick={handleDownloadImage}
@@ -147,7 +147,7 @@ function App() {
                 className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <FileText size={16} className="mr-2 text-red-500" />
-                Export PDF
+                Get PDF
               </button>
               <VideoExport devices={devices} onClose={() => {}} />
             </div>
