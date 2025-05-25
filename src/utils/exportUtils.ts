@@ -1,6 +1,7 @@
 import { Device } from '../types/types';
 import { formatTimeRange } from './dateUtils';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export const formatForLinkedIn = (devices: Device[]): string => {
   // Sort devices by start year (most recent first)
@@ -262,5 +263,183 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     link.click();
   } catch (error) {
     console.error('Failed to export LinkedIn image:', error);
+  }
+};
+
+export const exportAsPDF = async (
+  devices: Device[],
+  onProgress?: (progress: number) => void
+): Promise<void> => {
+  try {
+    // Create a new PDF document with square page size (1080x1080)
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: [1080, 1080]
+    });
+
+    // Sort devices by year (most recent first)
+    const sortedDevices = [...devices].sort((a, b) => b.startYear - a.startYear);
+
+    // Process each device
+    for (let i = 0; i < sortedDevices.length; i++) {
+      const device = sortedDevices[i];
+      
+      // Update progress
+      const progress = ((i + 1) / sortedDevices.length) * 100;
+      onProgress?.(progress);
+      
+      // Create a temporary container for the device card
+      const container = document.createElement('div');
+      container.style.width = '1080px';
+      container.style.height = '1080px';
+      container.style.background = 'linear-gradient(to bottom right, #eef2ff, #ffffff, #faf5ff)';
+      container.style.padding = '40px';
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
+
+      // Create device card content with fixed heights and dynamic text sizing
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; height: 100%;">
+          <div style="text-align: center; height: 120px; display: flex; flex-direction: column; justify-content: center;">
+            <h1 style="font-family: 'Arial', sans-serif; font-size: 48px; color: #1a1a1a; margin: 0; line-height: 1.2;">
+              ${device.name}
+            </h1>
+            <p style="font-family: 'Arial', sans-serif; font-size: 24px; color: #666; margin: 10px 0 0;">
+              ${device.startYear}
+            </p>
+          </div>
+          
+          <div style="flex: 1; display: flex; gap: 40px; margin-top: 20px; height: calc(100% - 140px);">
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+              <img 
+                src="${device.imageUrl}" 
+                alt="${device.name}"
+                style="max-width: 100%; max-height: 100%; object-fit: contain;"
+              />
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+              ${device.notes ? `
+                <div style="margin-bottom: 30px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                  <h2 style="font-family: 'Arial', sans-serif; font-size: 24px; color: #1a1a1a; margin: 0 0 15px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+                    My Notes
+                  </h2>
+                  <div class="auto-size-text" style="font-family: 'Arial', sans-serif; color: #666; line-height: 1.5; flex: 1; overflow: hidden;">
+                    ${device.notes}
+                  </div>
+                </div>
+              ` : ''}
+              
+              <div style="margin-bottom: 30px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <h2 style="font-family: 'Arial', sans-serif; font-size: 24px; color: #1a1a1a; margin: 0 0 15px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+                  Device Information
+                </h2>
+                <div class="auto-size-text" style="font-family: 'Arial', sans-serif; color: #666; line-height: 1.5; flex: 1; overflow: hidden;">
+                  ${device.description}
+                </div>
+              </div>
+              
+              ${device.wikiUrl ? `
+                <div style="flex: 0 0 auto;">
+                  <h2 style="font-family: 'Arial', sans-serif; font-size: 24px; color: #1a1a1a; margin: 0 0 15px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+                    Learn More
+                  </h2>
+                  <p style="font-family: 'Arial', sans-serif; font-size: 18px; color: #666; margin: 0;">
+                    <a href="${device.wikiUrl}" style="color: #2563eb; text-decoration: none;">
+                      Read on Wikipedia
+                    </a>
+                  </p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Wait for images to load before resizing text
+      const images = container.getElementsByTagName('img');
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      // Function to resize text
+      const resizeText = () => {
+        const textContainers = container.querySelectorAll('.auto-size-text');
+        textContainers.forEach(textContainer => {
+          const parent = textContainer.parentElement;
+          if (!parent) return;
+
+          const parentHeight = parent.clientHeight - 60; // Account for header and margins
+          const container = textContainer as HTMLElement;
+          
+          // Start with a large font size
+          let fontSize = 24;
+          container.style.fontSize = fontSize + 'px';
+          
+          // Reduce font size until text fits
+          while (container.scrollHeight > parentHeight && fontSize > 8) {
+            fontSize -= 0.5;
+            container.style.fontSize = fontSize + 'px';
+          }
+        });
+      };
+
+      // Initial resize
+      resizeText();
+
+      // Convert the container to canvas
+      const canvas = await html2canvas(container, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true, // Enable CORS for images
+        logging: false,
+        backgroundColor: null,
+        onclone: (clonedDoc) => {
+          // Resize text in the cloned document
+          const textContainers = clonedDoc.querySelectorAll('.auto-size-text');
+          textContainers.forEach(textContainer => {
+            const parent = textContainer.parentElement;
+            if (!parent) return;
+
+            const parentHeight = parent.clientHeight - 60;
+            const container = textContainer as HTMLElement;
+            
+            let fontSize = 24;
+            container.style.fontSize = fontSize + 'px';
+            
+            while (container.scrollHeight > parentHeight && fontSize > 8) {
+              fontSize -= 0.5;
+              container.style.fontSize = fontSize + 'px';
+            }
+          });
+        }
+      });
+
+      // Add the canvas to the PDF
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, 1080, 1080);
+
+      // Remove the temporary container
+      document.body.removeChild(container);
+
+      // Add a new page if this isn't the last device
+      if (i < sortedDevices.length - 1) {
+        pdf.addPage();
+      }
+    }
+
+    // Save the PDF
+    pdf.save('tech-timeline.pdf');
+    
+    // Set progress to 100% when complete
+    onProgress?.(100);
+  } catch (error) {
+    console.error('Error exporting PDF:', error);
+    throw error;
   }
 };

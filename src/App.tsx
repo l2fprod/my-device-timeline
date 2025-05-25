@@ -5,14 +5,19 @@ import DeviceSearch from './components/DeviceSearch';
 import VideoExport from './components/VideoExport';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Monitor, Plus, History, Linkedin, Image } from 'lucide-react';
-import { formatForLinkedIn, copyToClipboard, exportAsImage, exportAsLinkedInImage } from './utils/exportUtils';
+import { Monitor, Plus, History, Linkedin, Image, FileText } from 'lucide-react';
+import { formatForLinkedIn, copyToClipboard, exportAsImage, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
+import ExportProgressModal from './components/ExportProgressModal';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [copied, setCopied] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportTitle, setExportTitle] = useState('');
+  const [exportSubtitle, setExportSubtitle] = useState('');
 
   // Load devices from localStorage on component mount
   useEffect(() => {
@@ -79,6 +84,24 @@ function App() {
     await exportAsLinkedInImage(devices, 'tech-timeline.png');
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      setIsExporting(true);
+      setExportTitle('Exporting PDF');
+      setExportSubtitle('Generating your device timeline PDF...');
+      setExportProgress(0);
+      
+      await exportAsPDF(devices, (progress) => {
+        setExportProgress(progress);
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100">
@@ -119,6 +142,13 @@ function App() {
                 <Image size={16} className="mr-2 text-purple-500" />
                 Download Image
               </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <FileText size={16} className="mr-2 text-red-500" />
+                Export PDF
+              </button>
               <VideoExport devices={devices} onClose={() => {}} />
             </div>
           </div>
@@ -142,6 +172,24 @@ function App() {
           onCancel={() => setShowSearch(false)}
         />
       )}
+
+      <ExportProgressModal
+        isOpen={isExporting}
+        onClose={() => setIsExporting(false)}
+        progress={exportProgress}
+        title={exportTitle}
+        subtitle={exportSubtitle}
+      />
+
+      <footer className="bg-white/80 backdrop-blur-md shadow-lg border-t border-gray-100 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-16">
+            <p className="text-sm text-gray-600">
+              built by fred with his AI minions
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
