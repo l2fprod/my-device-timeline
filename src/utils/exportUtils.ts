@@ -92,8 +92,23 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       return palette[Math.abs(hash) % palette.length];
     }
 
-    // Add cards in zig-zag, wrapping layout
-    sortedDevices.forEach((device, i) => {
+    // Arrange devices in rows with alternating directions
+    const arrangedDevices: Device[] = [];
+    for (let row = 0; row < numRows; row++) {
+      const startIdx = row * numCardsPerRow;
+      const endIdx = Math.min(startIdx + numCardsPerRow, sortedDevices.length);
+      const rowDevices = sortedDevices.slice(startIdx, endIdx);
+      
+      // For odd rows (1-based), reverse the order
+      if (row % 2 === 1) {
+        rowDevices.reverse();
+      }
+      
+      arrangedDevices.push(...rowDevices);
+    }
+
+    // Add cards in the arranged order
+    arrangedDevices.forEach((device, i) => {
       const row = Math.floor(i / numCardsPerRow);
       const col = i % numCardsPerRow;
       const zigzag = (col % 2 === 0) ? 0 : zigzagOffset;
@@ -254,7 +269,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       container.appendChild(card);
 
       // Add connecting line if not the last card
-      if (i < sortedDevices.length - 1) {
+      if (i < arrangedDevices.length - 1) {
         const nextRow = Math.floor((i + 1) / numCardsPerRow);
         const nextCol = (i + 1) % numCardsPerRow;
         const nextZigzag = (nextCol % 2 === 0) ? 0 : zigzagOffset;
@@ -274,26 +289,49 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         // Calculate start and end points based on position
         let startX, startY, endX, endY;
         
-        if (col === numCardsPerRow - 1) {
-          // Last card in row - connect bottom to top
+        // Check if this is the last card in a row
+        const isLastInRow = col === numCardsPerRow - 1;
+        const isFirstInRow = col === 0;
+        const isLastRow = row === numRows - 1;
+        const isFirstRow = row === 0;
+        
+        if (isLastInRow && !isLastRow && row % 2 === 0) {
+          // Last card in an odd row (except last row) - connect to the last card of next row
+          const nextLastCol = numCardsPerRow - 1;
+          const nextLastLeft = margin + nextLastCol * (cardWidth + cardGapX);
+          const nextLastTop = margin + (row + 1) * (cardHeight + cardGapY) + ((nextLastCol % 2 === 0) ? 0 : zigzagOffset);
+          
           startX = left + cardWidth / 2;
           startY = top + cardHeight;
-          endX = nextLeft + cardWidth / 2;
-          endY = nextTop;
-        } else {
+          endX = nextLastLeft + cardWidth / 2;
+          endY = nextLastTop;
+        } else if (isFirstInRow && !isFirstRow && row % 2 === 1) {
+          // First card in an even row (except first row) - connect to the first card of next row
+          const nextFirstCol = 0;
+          const nextFirstLeft = margin + nextFirstCol * (cardWidth + cardGapX);
+          const nextFirstTop = margin + (row + 1) * (cardHeight + cardGapY) + ((nextFirstCol % 2 === 0) ? 0 : zigzagOffset);
+          
+          startX = left + cardWidth / 2;
+          startY = top + cardHeight;
+          endX = nextFirstLeft + cardWidth / 2;
+          endY = nextFirstTop;
+        } else if (col < numCardsPerRow - 1) {
           // Same row - connect right to left
           startX = left + cardWidth;
           startY = top + cardHeight / 2;
           endX = nextLeft;
           endY = nextTop + cardHeight / 2;
+        } else {
+          // Skip connection for last card of odd rows and even rows
+          return;
         }
 
         // Create path
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         let pathData;
         
-        if (col === numCardsPerRow - 1) {
-          // Vertical connection for last card in row
+        if ((isLastInRow && !isLastRow) || (isFirstInRow && !isFirstRow)) {
+          // Vertical connection for row transitions
           pathData = `M ${startX} ${startY} 
                      C ${startX} ${startY + cardGapY/2},
                        ${endX} ${endY - cardGapY/2},
@@ -306,15 +344,121 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
                        ${endX} ${endY}`;
         }
 
-        path.setAttribute('d', pathData);
-        path.setAttribute('stroke', '#ffffff');
-        path.setAttribute('stroke-width', '4');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-dasharray', '8,8');
-        path.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+        // Create the main electric cable path
+        const cablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        cablePath.setAttribute('d', pathData);
+        cablePath.setAttribute('stroke', 'url(#electricGradient)');
+        cablePath.setAttribute('stroke-width', '6');
+        cablePath.setAttribute('fill', 'none');
+        cablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
+        
+        // Create the inner glow path
+        const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        glowPath.setAttribute('d', pathData);
+        glowPath.setAttribute('stroke', '#ffffff');
+        glowPath.setAttribute('stroke-width', '2');
+        glowPath.setAttribute('fill', 'none');
+        glowPath.style.filter = 'blur(2px)';
 
-        svg.appendChild(path);
+        // Add gradient definition
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        gradient.setAttribute('id', 'electricGradient');
+        gradient.setAttribute('x1', '0%');
+        gradient.setAttribute('y1', '0%');
+        gradient.setAttribute('x2', '100%');
+        gradient.setAttribute('y2', '0%');
+        
+        const colors = [
+          { offset: '0%', color: '#4facfe' },
+          { offset: '25%', color: '#00f2fe' },
+          { offset: '50%', color: '#4facfe' },
+          { offset: '75%', color: '#00f2fe' },
+          { offset: '100%', color: '#4facfe' }
+        ];
+        
+        colors.forEach(({ offset, color }) => {
+          const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+          stop.setAttribute('offset', offset);
+          stop.setAttribute('stop-color', color);
+          gradient.appendChild(stop);
+        });
+        
+        defs.appendChild(gradient);
+        svg.appendChild(defs);
+        svg.appendChild(glowPath);
+        svg.appendChild(cablePath);
+
+        // Add random sparkles along the path
+        const numSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
+        for (let i = 0; i < numSparkles; i++) {
+          const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          const t = Math.random(); // Random position along the path
+          
+          // Calculate position along the path
+          const x = startX + (endX - startX) * t;
+          const y = startY + (endY - startY) * t;
+          
+          sparkle.setAttribute('cx', x.toString());
+          sparkle.setAttribute('cy', y.toString());
+          sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
+          sparkle.setAttribute('fill', '#ffffff');
+          sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
+          
+          svg.appendChild(sparkle);
+        }
+
         container.appendChild(svg);
+
+        // For first card of even rows, also create a connection to the next card in the same row
+        if (isFirstInRow && row % 2 === 1 && !isLastRow) {
+          const nextCardLeft = margin + (col + 1) * (cardWidth + cardGapX);
+          const nextCardTop = top; // Same row, so same top position
+
+          const horizontalPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const horizontalPathData = `M ${left + cardWidth} ${top + cardHeight / 2} 
+                                    C ${left + cardWidth + cardGapX/2} ${top + cardHeight / 2},
+                                      ${nextCardLeft - cardGapX/2} ${nextCardTop + cardHeight / 2},
+                                      ${nextCardLeft} ${nextCardTop + cardHeight / 2}`;
+
+          // Create the main electric cable path
+          const horizontalCablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          horizontalCablePath.setAttribute('d', horizontalPathData);
+          horizontalCablePath.setAttribute('stroke', 'url(#electricGradient)');
+          horizontalCablePath.setAttribute('stroke-width', '6');
+          horizontalCablePath.setAttribute('fill', 'none');
+          horizontalCablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
+          
+          // Create the inner glow path
+          const horizontalGlowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          horizontalGlowPath.setAttribute('d', horizontalPathData);
+          horizontalGlowPath.setAttribute('stroke', '#ffffff');
+          horizontalGlowPath.setAttribute('stroke-width', '2');
+          horizontalGlowPath.setAttribute('fill', 'none');
+          horizontalGlowPath.style.filter = 'blur(2px)';
+
+          svg.appendChild(horizontalGlowPath);
+          svg.appendChild(horizontalCablePath);
+
+          // Add random sparkles along the horizontal path
+          const numHorizontalSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
+          for (let i = 0; i < numHorizontalSparkles; i++) {
+            const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            const t = Math.random(); // Random position along the path
+            
+            // Calculate position along the path
+            const x = (left + cardWidth) + (nextCardLeft - (left + cardWidth)) * t;
+            const y = top + cardHeight / 2;
+            
+            sparkle.setAttribute('cx', x.toString());
+            sparkle.setAttribute('cy', y.toString());
+            sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
+            sparkle.setAttribute('fill', '#ffffff');
+            sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
+            
+            svg.appendChild(sparkle);
+          }
+        }
       }
     });
 
