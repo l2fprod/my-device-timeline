@@ -25,6 +25,7 @@ export interface WikipediaSearchResult {
   title: string;
   description: string;
   imageUrl: string;
+  additionalImages: string[];
   wikiUrl: string;
   releaseYear: number | null;
   category: DeviceCategory;

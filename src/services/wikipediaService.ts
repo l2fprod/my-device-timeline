@@ -56,6 +56,59 @@ const detectDeviceCategory = (title: string, description: string): DeviceCategor
   return 'other';
 };
 
+const fetchPageImages = async (pageId: number): Promise<string[]> => {
+  try {
+    const url = new URL(WIKIPEDIA_ACTION_API);
+    url.search = new URLSearchParams({
+      action: 'query',
+      format: 'json',
+      pageids: pageId.toString(),
+      prop: 'images',
+      imlimit: '10',
+      origin: '*'
+    }).toString();
+
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.query?.pages?.[pageId]?.images) {
+      return [];
+    }
+
+    // Filter for image files and get their URLs
+    const imageTitles = data.query.pages[pageId].images
+      .filter((img: any) => img.title.toLowerCase().endsWith('.jpg') || 
+                          img.title.toLowerCase().endsWith('.png') ||
+                          img.title.toLowerCase().endsWith('.jpeg'))
+      .map((img: any) => img.title);
+
+    // Get image URLs
+    const imageUrls = await Promise.all(
+      imageTitles.map(async (title: string) => {
+        const imageUrl = new URL(WIKIPEDIA_ACTION_API);
+        imageUrl.search = new URLSearchParams({
+          action: 'query',
+          format: 'json',
+          titles: title,
+          prop: 'imageinfo',
+          iiprop: 'url',
+          origin: '*'
+        }).toString();
+
+        const response = await fetch(imageUrl);
+        const data = await response.json();
+        const pages = Object.values(data.query.pages);
+        return pages[0]?.imageinfo?.[0]?.url || '';
+      })
+    );
+
+    return imageUrls.filter(url => url !== '');
+  } catch (error) {
+    console.error('Error fetching page images:', error);
+    return [];
+  }
+};
+
 export const searchWikipedia = async (query: string): Promise<WikipediaSearchResult[]> => {
   try {
     // Use the action API with origin=* for CORS support
@@ -82,18 +135,35 @@ export const searchWikipedia = async (query: string): Promise<WikipediaSearchRes
       return [];
     }
 
-    return Object.values(data.query.pages).map((page: any) => {
-      const title = page.title;
-      const description = page.extract || 'No description available';
-      return {
-        title,
-        description,
-        imageUrl: page.thumbnail ? page.thumbnail.source : '', 
-        wikiUrl: page.fullurl,
-        releaseYear: extractYearFromText(description),
-        category: detectDeviceCategory(title, description)
-      };
-    }) as WikipediaSearchResult[];
+    const results = await Promise.all(
+      Object.values(data.query.pages).map(async (page: any) => {
+        const title = page.title;
+        const description = page.extract || 'No description available';
+        const defaultImageUrl = page.thumbnail ? page.thumbnail.source : '';
+        
+        // Fetch additional images
+        const additionalImages = await fetchPageImages(page.pageid);
+        const allImages = [defaultImageUrl, ...additionalImages].filter(url => url !== '');
+
+        // Only return results that have at least one image
+        if (allImages.length === 0) {
+          return null;
+        }
+
+        return {
+          title,
+          description,
+          imageUrl: defaultImageUrl,
+          additionalImages: allImages,
+          wikiUrl: page.fullurl,
+          releaseYear: extractYearFromText(description),
+          category: detectDeviceCategory(title, description)
+        };
+      })
+    );
+
+    // Filter out null results (entries with no images)
+    return results.filter((result): result is WikipediaSearchResult => result !== null);
   } catch (error) {
     console.error('Error fetching from Wikipedia:', error);
     return [];
