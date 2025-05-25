@@ -107,7 +107,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <img src="/favicon.svg" alt="My Electronic Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
+              <img src="favicon.svg" alt="My Electronic Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
               <h1 className="text-ml font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 My Electronic Timeline
               </h1>
