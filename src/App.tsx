@@ -113,7 +113,7 @@ function App() {
     try {
       setIsExporting(true);
       setExportTitle('Exporting PDF');
-      setExportSubtitle('Generating your device timeline PDF...');
+      setExportSubtitle('Generating your timeline PDF...');
       setExportProgress(0);
       
       await exportAsPDF(devices, (progress) => {
@@ -198,9 +198,9 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-3">
-                <img src="favicon.svg" alt="My Device Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
+                <img src="favicon.svg" alt="My Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
                 <h1 className="text-ml font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  My Device Timeline
+                  My Timeline
                 </h1>
               </div>
               <div className="flex items-center space-x-3">
@@ -235,7 +235,7 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-grow flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <main className="flex-grow flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-16">
           <div className="text-center w-full">
             <div className="relative w-64 h-64 mx-auto mb-8">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full opacity-50 animate-pulse"></div>
@@ -244,14 +244,14 @@ function App() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <img 
                   src="favicon.svg" 
-                  alt="My Device Timeline" 
+                  alt="My Timeline" 
                   className="w-32 h-32 text-indigo-500 animate-spin-slow"
                 />
               </div>
             </div>
             
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Start Building Your Device Timeline
+              Start Building Your Timeline
             </h2>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               Track your journey through technology by adding the devices that have shaped your digital life. From your first computer to your latest smartphone, create a visual history of your tech evolution.
@@ -302,9 +302,9 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <img src="favicon.svg" alt="My Device Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
+              <img src="favicon.svg" alt="My Timeline" className="h-10 w-10 transform hover:scale-110 transition-transform duration-200" />
               <h1 className="text-ml font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                My Device Timeline
+                My Timeline
               </h1>
             </div>
             <div className="flex items-center space-x-3">
