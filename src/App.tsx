@@ -4,7 +4,7 @@ import Timeline from './components/Timeline';
 import DeviceSearch from './components/DeviceSearch';
 import { saveDevices, loadDevices } from './services/storageService';
 import { getSampleDevices } from './utils/sampleDevices';
-import { Plus, History, Linkedin, Image, FileText, Trash2 } from 'lucide-react';
+import { Plus, History, Linkedin, Image, FileText, Trash2, Menu, X } from 'lucide-react';
 import { formatForLinkedIn, copyToClipboard, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
 import ExportProgressModal from './components/ExportProgressModal';
 
@@ -12,6 +12,7 @@ function App() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [exportProgress, setExportProgress] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
@@ -120,6 +121,7 @@ function App() {
               </h1>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Always visible Add Device button */}
               <button
                 onClick={handleAddDevice}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -127,32 +129,88 @@ function App() {
                 <Plus size={16} className="mr-2" />
                 Add Device
               </button>
+
+              {/* Menu button for mobile */}
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="lg:hidden inline-flex items-center p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {showMenu ? <X size={20} /> : <Menu size={20} />}
+              </button>
+
+              {/* Desktop toolbar */}
+              <div className="hidden lg:flex items-center space-x-3">
+                <button
+                  onClick={handleCopyForLinkedIn}
+                  className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <Linkedin size={16} className="mr-2 text-blue-600" />
+                  {copied ? 'Copied!' : 'Copy as Text'}
+                </button>
+                <button
+                  onClick={handleDownloadImage}
+                  className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <Image size={16} className="mr-2 text-purple-500" />
+                  PNG
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <FileText size={16} className="mr-2 text-red-500" />
+                  PDF
+                </button>
+                <div className="h-6 w-px bg-gray-200 mx-2" />
+                {devices.length > 0 && (
+                  <button
+                    onClick={handleClearTimeline}
+                    className="inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    title="Clear Timeline"
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Clear
+                  </button>
+                )}
+                <button
+                  onClick={handleLoadSampleDevices}
+                  className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <History size={16} className="mr-2 text-indigo-500" />
+                  Sample
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile menu */}
+          {showMenu && (
+            <div className="lg:hidden py-4 space-y-2">
               <button
                 onClick={handleCopyForLinkedIn}
-                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <Linkedin size={16} className="mr-2 text-blue-600" />
                 {copied ? 'Copied!' : 'Copy as Text'}
               </button>
               <button
                 onClick={handleDownloadImage}
-                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <Image size={16} className="mr-2 text-purple-500" />
                 PNG
               </button>
               <button
                 onClick={handleDownloadPDF}
-                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <FileText size={16} className="mr-2 text-red-500" />
                 PDF
               </button>
-              <div className="h-6 w-px bg-gray-200 mx-2" />
               {devices.length > 0 && (
                 <button
                   onClick={handleClearTimeline}
-                  className="inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="w-full inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   title="Clear Timeline"
                 >
                   <Trash2 size={16} className="mr-2" />
@@ -161,13 +219,13 @@ function App() {
               )}
               <button
                 onClick={handleLoadSampleDevices}
-                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <History size={16} className="mr-2 text-indigo-500" />
                 Sample
               </button>
             </div>
-          </div>
+          )}
         </div>
       </header>
 
