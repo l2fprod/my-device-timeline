@@ -95,6 +95,13 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
             placeholder="Add notes..."
             rows={2}
           />
+          <input
+            type="text"
+            value={editedDevice.imageUrl}
+            onChange={(e) => setEditedDevice({ ...editedDevice, imageUrl: e.target.value })}
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Image URL"
+          />
           <div className="flex justify-end space-x-2">
             <button
               onClick={handleCancel}
