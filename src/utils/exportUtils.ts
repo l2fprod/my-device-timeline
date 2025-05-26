@@ -26,11 +26,11 @@ const toBold = (text: string): string => {
 
 const getRandomIntro = (): string => {
   const intros = [
-    "💫 My Technology Journey 💻 Ever wondered how your tech stack evolved? Here's mine! Create your own at https://l2fprod.github.io/my-device-timeline",
-    "💫 From floppy disks to cloud storage - here's my tech evolution! 💻 Want to map your own journey? Try https://l2fprod.github.io/my-device-timeline",
-    "🚀 My Digital Timeline: A Journey Through Tech 💻 Every device tells a story. What's yours? Create your timeline at https://l2fprod.github.io/my-device-timeline",
-    "🚀 The Evolution of My Tech Arsenal 💻 From first computer to latest gadget - here's my journey! Map yours at https://l2fprod.github.io/my-device-timeline",
-    "💫 My Tech Timeline: A Story of Innovation 📱 Each device marks a milestone in my digital journey. Start yours at https://l2fprod.github.io/my-device-timeline"
+    "💫 My Technology Journey 💻 Ever wondered how your tech stack evolved? Here's mine! Create your own at https://mytimeline.fredericlavigne.com",
+    "💫 From floppy disks to cloud storage - here's my tech evolution! 💻 Want to map your own journey? Try https://mytimeline.fredericlavigne.com",
+    "🚀 My Digital Timeline: A Journey Through Tech 💻 Every device tells a story. What's yours? Create your timeline at https://mytimeline.fredericlavigne.com",
+    "🚀 The Evolution of My Tech Arsenal 💻 From first computer to latest gadget - here's my journey! Map yours at https://mytimeline.fredericlavigne.com",
+    "💫 My Tech Timeline: A Story of Innovation 📱 Each device marks a milestone in my digital journey. Start yours at https://mytimeline.fredericlavigne.com"
   ];
   return intros[Math.floor(Math.random() * intros.length)];
 };
@@ -238,7 +238,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     attribution.setAttribute('font-family', 'Arial, sans-serif');
     attribution.setAttribute('font-size', '16');
     attribution.setAttribute('font-weight', 'bold');
-    attribution.textContent = 'Create your own at l2fprod.github.io/my-device-timeline';
+    attribution.textContent = 'Create your own at mytimeline.fredericlavigne.com';
     attribution.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
     svgContainer.appendChild(attribution);
 
