@@ -401,26 +401,47 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         const notes = document.createElement('div');
         notes.textContent = device.notes;
         notes.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        notes.style.fontSize = '13px';
         notes.style.fontWeight = '500';
         notes.style.letterSpacing = '0.01em';
         notes.style.color = '#ffffff';
         notes.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
         notes.style.background = 'rgba(255,255,255,0.1)';
-        notes.style.borderRadius = '10px';
-        notes.style.marginTop = '10px';
+        notes.style.borderRadius = '22px';
+        notes.style.marginTop = '20px';
         notes.style.flex = '1 1 auto';
         notes.style.overflow = 'hidden';
-        notes.style.maxHeight = '80px';
+        notes.style.maxHeight = '300px';
         notes.style.textOverflow = 'ellipsis';
-        notes.style.width = 'calc(100% - 16px)';
+        notes.style.width = 'calc(100% - 40px)';
         notes.style.boxShadow = `0 1px 6px 0 #0001`;
         notes.style.textAlign = 'center';
-        notes.style.display = '-webkit-box';
-        notes.style.webkitLineClamp = '4';
-        notes.style.webkitBoxOrient = 'vertical';
+        notes.style.display = 'flex';
+        notes.style.alignItems = 'center';
+        notes.style.justifyContent = 'center';
         notes.style.wordBreak = 'break-word';
-        card.appendChild(notes);
+        notes.style.padding = '20px';
+        notes.style.whiteSpace = 'pre-wrap';
+        notes.style.lineHeight = '1.5';
+        container.appendChild(notes);
+
+        // Calculate optimal font size based on text length and available space
+        const textLength = device.notes.length;
+        const availableWidth = notes.clientWidth - 40; // Account for padding
+        const availableHeight = notes.clientHeight - 40; // Account for padding
+        
+        // Calculate font size based on available space and text length
+        // We want to fit the text within the available space while maximizing readability
+        const maxFontSize = Math.min(
+          availableWidth / (textLength * 0.3), // Width-based calculation (0.3 is an average character width factor)
+          availableHeight / 2, // Height-based calculation (divide by 2 to account for line height)
+          100 // Maximum font size
+        );
+        
+        // Ensure minimum readable size
+        const fontSize = Math.max(maxFontSize, 16);
+        
+        // Apply the calculated font size
+        notes.style.fontSize = `${fontSize}px`;
       }
 
       // Optional: sparkle overlay
@@ -783,26 +804,47 @@ export const exportAsPDF = async (
         const notes = document.createElement('div');
         notes.textContent = device.notes;
         notes.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        notes.style.fontSize = '13px';
         notes.style.fontWeight = '500';
         notes.style.letterSpacing = '0.01em';
         notes.style.color = '#ffffff';
         notes.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
         notes.style.background = 'rgba(255,255,255,0.1)';
-        notes.style.borderRadius = '10px';
-        notes.style.marginTop = '10px';
+        notes.style.borderRadius = '22px';
+        notes.style.marginTop = '20px';
         notes.style.flex = '1 1 auto';
         notes.style.overflow = 'hidden';
-        notes.style.maxHeight = '80px';
+        notes.style.maxHeight = '300px';
         notes.style.textOverflow = 'ellipsis';
-        notes.style.width = 'calc(100% - 16px)';
+        notes.style.width = 'calc(100% - 40px)';
         notes.style.boxShadow = `0 1px 6px 0 #0001`;
         notes.style.textAlign = 'center';
-        notes.style.display = '-webkit-box';
-        notes.style.webkitLineClamp = '4';
-        notes.style.webkitBoxOrient = 'vertical';
+        notes.style.display = 'flex';
+        notes.style.alignItems = 'center';
+        notes.style.justifyContent = 'center';
         notes.style.wordBreak = 'break-word';
+        notes.style.padding = '20px';
+        notes.style.whiteSpace = 'pre-wrap';
+        notes.style.lineHeight = '1.5';
         container.appendChild(notes);
+
+        // Calculate optimal font size based on text length and available space
+        const textLength = device.notes.length;
+        const availableWidth = notes.clientWidth - 40; // Account for padding
+        const availableHeight = notes.clientHeight - 40; // Account for padding
+        
+        // Calculate font size based on available space and text length
+        // We want to fit the text within the available space while maximizing readability
+        const maxFontSize = Math.min(
+          availableWidth / (textLength * 0.3), // Width-based calculation (0.3 is an average character width factor)
+          availableHeight / 2, // Height-based calculation (divide by 2 to account for line height)
+          100 // Maximum font size
+        );
+        
+        // Ensure minimum readable size
+        const fontSize = Math.max(maxFontSize, 16);
+        
+        // Apply the calculated font size
+        notes.style.fontSize = `${fontSize}px`;
       }
 
       // Sparkle overlay
