@@ -223,10 +223,11 @@ function App() {
               <div className="absolute inset-4 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
               <div className="absolute inset-8 bg-gradient-to-br from-indigo-300 to-purple-300 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '1s' }}></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <svg className="w-32 h-32 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2v20M2 12h20" />
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
+                <img 
+                  src="favicon.svg" 
+                  alt="My Device Timeline" 
+                  className="w-32 h-32 text-indigo-500 animate-spin-slow"
+                />
               </div>
             </div>
             
@@ -351,19 +352,18 @@ function App() {
                 {devices.length > 0 && (
                   <button
                     onClick={handleClearTimeline}
-                    className="inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="inline-flex items-center p-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     title="Clear Timeline"
                   >
-                    <Trash2 size={16} className="mr-2" />
-                    Clear
+                    <Trash2 size={16} />
                   </button>
                 )}
                 <button
                   onClick={handleLoadSampleDevices}
-                  className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="inline-flex items-center p-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  title="Load Sample Timeline"
                 >
-                  <Sparkles size={16} className="mr-2 text-indigo-500" />
-                  Sample
+                  <Sparkles size={16} className="text-indigo-500" />
                 </button>
               </div>
             </div>
@@ -418,7 +418,6 @@ function App() {
                 <button
                   onClick={handleClearTimeline}
                   className="w-full inline-flex items-center px-4 py-2 border border-red-200 shadow-sm text-sm font-medium rounded-full text-red-600 bg-white hover:bg-red-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  title="Clear Timeline"
                 >
                   <Trash2 size={16} className="mr-2" />
                   Clear
