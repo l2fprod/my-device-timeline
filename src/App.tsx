@@ -211,6 +211,25 @@ function App() {
                   <Plus size={16} className="mr-2" />
                   Add Device
                 </button>
+                <label
+                  className="inline-flex items-center p-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+                  title="Import Timeline from JSON"
+                >
+                  <Upload size={16} className="text-blue-500" />
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportJSON}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  onClick={handleLoadSampleDevices}
+                  className="inline-flex items-center p-2 border border-gray-200 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  title="Load Sample Timeline"
+                >
+                  <Sparkles size={16} className="text-indigo-500" />
+                </button>
               </div>
             </div>
           </div>
