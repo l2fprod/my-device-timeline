@@ -1,12 +1,50 @@
-import { Device } from '../types/types';
+import { Device, DeviceCategory } from '../types/types';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+const toBold = (text: string): string => {
+  const boldMap: Record<string, string> = {
+    // Letters
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣',
+    'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭',
+    'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉',
+    'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓',
+    'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+    // Numbers
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗',
+    // Special characters
+    '+': '➕', '-': '➖', '×': '✖️', '÷': '➗', '=': '🟰', '!': '❗', '?': '❓',
+    '(': '❨', ')': '❩', '[': '❲', ']': '❳', '{': '❴', '}': '❵',
+    '<': '❮', '>': '❯', '/': '⁄', '\\': '∖', '|': '❘', '&': '＆',
+    '@': '＠', '#': '＃', '$': '＄', '%': '％', '^': '＾', '*': '＊',
+    '.': '․', ',': '，', ';': '；', ':': '：', '"': '＂', "'": '＇',
+    ' ': ' '
+  };
+  return text.split('').map(char => boldMap[char] || char).join('');
+};
+
+const getRandomIntro = (): string => {
+  const intros = [
+    "💫 My Technology Journey 💻 Ever wondered how your tech stack evolved? Here's mine! Create your own at https://l2fprod.github.io/my-device-timeline",
+    "💫 From floppy disks to cloud storage - here's my tech evolution! 💻 Want to map your own journey? Try https://l2fprod.github.io/my-device-timeline",
+    "🚀 My Digital Timeline: A Journey Through Tech 💻 Every device tells a story. What's yours? Create your timeline at https://l2fprod.github.io/my-device-timeline",
+    "🚀 The Evolution of My Tech Arsenal 💻 From first computer to latest gadget - here's my journey! Map yours at https://l2fprod.github.io/my-device-timeline",
+    "💫 My Tech Timeline: A Story of Innovation 📱 Each device marks a milestone in my digital journey. Start yours at https://l2fprod.github.io/my-device-timeline"
+  ];
+  return intros[Math.floor(Math.random() * intros.length)];
+};
+
 export const formatForLinkedIn = (devices: Device[]): string => {
-  // Sort devices by start year (most recent first)
-  const sortedDevices = [...devices].sort((a, b) => b.startYear - a.startYear);
+  // Sort devices by start year (oldest first) and then alphabetically
+  const sortedDevices = [...devices].sort((a, b) => {
+    if (a.startYear !== b.startYear) {
+      return a.startYear - b.startYear;
+    }
+    return a.name.localeCompare(b.name);
+  });
   
-  let output = '📱 My Technology Journey 💻\n\n';
+  let output = `${getRandomIntro()}\n\n`;
   
   // Group devices by year
   const devicesByYear = sortedDevices.reduce((acc, device) => {
@@ -19,14 +57,12 @@ export const formatForLinkedIn = (devices: Device[]): string => {
   
   // Output devices grouped by year
   Object.entries(devicesByYear)
-    .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+    .sort(([yearA], [yearB]) => Number(yearA) - Number(yearB))
     .forEach(([year, yearDevices]) => {
       output += `📅 ${year}\n`;
       yearDevices.forEach(device => {
-        output += `🔹 ${device.name}\n`;
-        if (device.notes) {
-          output += `   ${device.notes}\n`;
-        }
+        const categoryEmoji = getCategoryEmoji(device.category);
+        output += `${categoryEmoji} ${toBold(device.name)}${device.notes ? ` - ${device.notes}` : ''}\n`;
       });
       output += '\n';
     });
@@ -34,6 +70,21 @@ export const formatForLinkedIn = (devices: Device[]): string => {
   output += '#TechJourney #Technology #ProfessionalDevelopment';
   
   return output;
+};
+
+const getCategoryEmoji = (category: DeviceCategory): string => {
+  const emojis: Record<DeviceCategory, string> = {
+    smartphone: '📱',
+    laptop: '💻',
+    desktop: '🖥️',
+    tablet: '📱',
+    smartwatch: '⌚',
+    gaming: '🎮',
+    audio: '🎧',
+    camera: '📸',
+    other: '🔧'
+  };
+  return emojis[category];
 };
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
