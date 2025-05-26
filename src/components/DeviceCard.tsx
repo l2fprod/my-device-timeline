@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Device, DeviceCategory } from '../types/types';
-import { getYearOptions } from '../utils/dateUtils';
+import { Edit2, Trash2 } from 'lucide-react';
 import { getDeviceImageFallback } from '../services/wikipediaService';
 import { getCategoryColor } from '../utils/categoryUtils';
-import { Edit2, Trash2, Save, X } from 'lucide-react';
 
 interface DeviceCardProps {
   device: Device;
   onUpdate: (device: Device) => void;
   onDelete: (id: string) => void;
+  onEdit: (device: Device) => void;
 }
 
-const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedDevice, setEditedDevice] = useState(device);
-  const [imageFit, setImageFit] = useState<'cover' | 'contain'>('cover');
-  const yearOptions = getYearOptions();
-  
+const DeviceCard: React.FC<DeviceCardProps> = ({ device, onDelete, onEdit }) => {
+  const [imageError, setImageError] = React.useState(false);
+  const [imageFit, setImageFit] = React.useState<'cover' | 'contain'>('cover');
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = getDeviceImageFallback(device.category);
+  };
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalHeight > img.naturalWidth) {
+      setImageFit('contain');
+    }
+  };
+
   const deviceCategories: { value: DeviceCategory; label: string }[] = [
     { value: 'smartphone', label: 'Smartphone' },
     { value: 'laptop', label: 'Laptop' },
@@ -28,98 +37,6 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
     { value: 'camera', label: 'Camera' },
     { value: 'other', label: 'Other' }
   ];
-
-  const handleSave = () => {
-    onUpdate(editedDevice);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setEditedDevice(device);
-    setIsEditing(false);
-  };
-
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (img.naturalHeight > img.naturalWidth) {
-      setImageFit('contain');
-    }
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = getDeviceImageFallback(device.category);
-  };
-
-  if (isEditing) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={editedDevice.name}
-            onChange={(e) => setEditedDevice({ ...editedDevice, name: e.target.value })}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Device name"
-          />
-          <select
-            value={editedDevice.category}
-            onChange={(e) => setEditedDevice({ ...editedDevice, category: e.target.value as DeviceCategory })}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {deviceCategories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="number"
-              value={editedDevice.startYear}
-              onChange={(e) => setEditedDevice({ ...editedDevice, startYear: parseInt(e.target.value) })}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Start year"
-            />
-            <input
-              type="number"
-              value={editedDevice.endYear || ''}
-              onChange={(e) => setEditedDevice({ ...editedDevice, endYear: e.target.value ? parseInt(e.target.value) : null })}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="End year (optional)"
-            />
-          </div>
-          <textarea
-            value={editedDevice.notes}
-            onChange={(e) => setEditedDevice({ ...editedDevice, notes: e.target.value })}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Add notes..."
-            rows={2}
-          />
-          <input
-            type="text"
-            value={editedDevice.imageUrl}
-            onChange={(e) => setEditedDevice({ ...editedDevice, imageUrl: e.target.value })}
-            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Image URL"
-          />
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={handleCancel}
-              className="p-1 text-gray-500 hover:text-gray-700"
-            >
-              <X size={14} />
-            </button>
-            <button
-              onClick={handleSave}
-              className="p-1 text-blue-600 hover:text-blue-700"
-            >
-              <Save size={14} />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -149,7 +66,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onUpdate, onDelete }) =
             )}
             <div className="flex space-x-1 ml-2 flex-shrink-0">
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={() => onEdit(device)}
                 className="p-1 text-gray-400 hover:text-gray-600"
               >
                 <Edit2 size={12} />

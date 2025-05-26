@@ -7,12 +7,14 @@ import { getSampleDevices } from './utils/sampleDevices';
 import { Plus, History, Linkedin, Image, FileText, Trash2, Menu, X } from 'lucide-react';
 import { formatForLinkedIn, copyToClipboard, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
 import ExportProgressModal from './components/ExportProgressModal';
+import DeviceEditModal from './components/DeviceEditModal';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [exportProgress, setExportProgress] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
@@ -58,6 +60,15 @@ function App() {
     setDevices(devices.map(device => 
       device.id === updatedDevice.id ? updatedDevice : device
     ));
+    setEditingDevice(null);
+  };
+
+  const handleEditDevice = (device: Device) => {
+    setEditingDevice(device);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDevice(null);
   };
 
   const handleDeleteDevice = (id: string) => {
@@ -236,6 +247,7 @@ function App() {
             onAddDevice={handleAddDevice}
             onUpdateDevice={handleUpdateDevice}
             onDeleteDevice={handleDeleteDevice}
+            onEditDevice={handleEditDevice}
           />
         </div>
       </main>
@@ -244,6 +256,14 @@ function App() {
         <DeviceSearch 
           onSelectDevice={handleSelectDevice}
           onCancel={() => setShowSearch(false)}
+        />
+      )}
+
+      {editingDevice && (
+        <DeviceEditModal
+          device={editingDevice}
+          onSave={handleUpdateDevice}
+          onCancel={handleCancelEdit}
         />
       )}
 
