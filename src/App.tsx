@@ -8,6 +8,7 @@ import { Plus, Sparkles, Linkedin, Image, FileText, Trash2, Menu, X, Upload, Dow
 import { formatForLinkedIn, copyToClipboard, exportAsLinkedInImage, exportAsPDF } from './utils/exportUtils';
 import ExportProgressModal from './components/ExportProgressModal';
 import DeviceEditModal from './components/DeviceEditModal';
+import { generateUUID } from './utils/uuid';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -55,7 +56,7 @@ function App() {
   const handleSelectDevice = (result: WikipediaSearchResult, category: DeviceCategory) => {
     const currentYear = new Date().getFullYear();
     const newDevice: Device = {
-      id: crypto.randomUUID(), // Modern browsers have this built-in
+      id: generateUUID(), // Using our custom UUID generator instead of crypto.randomUUID()
       name: result.title,
       category,
       startYear: result.releaseYear || currentYear,
@@ -171,7 +172,7 @@ function App() {
               // Generate new IDs for imported devices to avoid conflicts
               const devicesWithNewIds = importedDevices.map(device => ({
                 ...device,
-                id: crypto.randomUUID()
+                id: generateUUID()
               }));
               setDevices([...devices, ...devicesWithNewIds]);
             }

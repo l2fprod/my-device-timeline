@@ -1,4 +1,5 @@
 import { Device } from '../types/types';
+import { generateUUID } from './uuid';
 
 const sampleDevices: Device[] = [
   {
@@ -215,6 +216,6 @@ const sampleDevices: Device[] = [
 export const getSampleDevices = (): Device[] => {
   return sampleDevices.map(device => ({
     ...device,
-    id: crypto.randomUUID() // Generate new IDs to avoid conflicts
+    id: generateUUID() // Generate new IDs to avoid conflicts
   }));
 }; 
