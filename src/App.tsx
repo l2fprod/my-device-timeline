@@ -90,8 +90,8 @@ function App() {
   };
 
   const handleLoadSampleDevices = () => {
-    if (window.confirm('This will add 20 sample devices to your timeline. Continue?')) {
-      const sampleDevices = getSampleDevices();
+    const sampleDevices = getSampleDevices();
+    if (window.confirm(`This will add ${sampleDevices.length} sample devices to your timeline. Continue?`)) {
       setDevices([...devices, ...sampleDevices]);
     }
   };
@@ -216,8 +216,8 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
+        <main className="flex-grow flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center w-full">
             <div className="relative w-64 h-64 mx-auto mb-8">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full opacity-50 animate-pulse"></div>
               <div className="absolute inset-4 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
