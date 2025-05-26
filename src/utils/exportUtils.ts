@@ -843,7 +843,7 @@ export const exportAsPDF = async (
         scale: 1.5, // Reduced from 2 for better performance
         useCORS: true,
         logging: false,
-        backgroundColor: null,
+        backgroundColor: '#0d192f', // Match the PDF background color
         width: cardWidth,
         height: cardHeight,
         allowTaint: true, // Allow cross-origin images
@@ -853,6 +853,9 @@ export const exportAsPDF = async (
           const clonedContainer = clonedDoc.querySelector('div');
           if (clonedContainer) {
             clonedContainer.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+            // Add a mask to ensure corners are properly rounded
+            clonedContainer.style.maskImage = 'radial-gradient(circle at 50% 50%, black 100%, transparent 100%)';
+            clonedContainer.style.webkitMaskImage = 'radial-gradient(circle at 50% 50%, black 100%, transparent 100%)';
           }
         }
       });
