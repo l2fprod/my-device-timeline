@@ -142,7 +142,7 @@ function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'device-timeline.json';
+    a.download = 'mytimeline.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
