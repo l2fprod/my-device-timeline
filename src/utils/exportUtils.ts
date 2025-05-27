@@ -68,7 +68,7 @@ export const formatForLinkedIn = (devices: Device[]): string => {
       output += '\n';
     });
   
-  output += '#TechJourney #Technology #ProfessionalDevelopment';
+  output += '#TechEvolution #DigitalJourney #TechTimeline #TechHistory #TechStory #VibeCoding';
   
   return output;
 };
