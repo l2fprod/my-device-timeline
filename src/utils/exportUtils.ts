@@ -123,19 +123,48 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     const totalRowWidth = numCardsPerRow * layout.cardWidth + (numCardsPerRow - 1) * layout.cardGapX;
     layout.startX = Math.max(0, (layout.imageWidth - totalRowWidth) / 2);
 
-    // Arrange devices in rows with alternating directions
-    const arrangedDevices: Device[] = [];
+    // Arrange devices in rows with correct column placement for single-card rows
+    // Build a 2D array of rows and columns
+    type DeviceWithCol = { device: Device, col: number, row: number };
+    const arrangedDevices: DeviceWithCol[] = [];
+    let deviceIdx = 0;
     for (let row = 0; row < numRows; row++) {
-      const startIdx = row * numCardsPerRow;
-      const endIdx = Math.min(startIdx + numCardsPerRow, sortedDevices.length);
-      const rowDevices = sortedDevices.slice(startIdx, endIdx);
-      
-      // For odd rows (1-based), reverse the order
-      if (row % 2 === 1) {
-        rowDevices.reverse();
+      const rowDevices = sortedDevices.slice(deviceIdx, deviceIdx + numCardsPerRow);
+      const rowArr: (Device | null)[] = Array(numCardsPerRow).fill(null);
+      if (rowDevices.length === 1 && row > 0) {
+        // Place the single device in the same column as the card it is connected to in the previous row
+        const prevRow = arrangedDevices.filter(d => d.row === row - 1);
+        let targetCol: number | undefined = undefined;
+        if ((row - 1) % 2 === 1) {
+          // Previous row is right-to-left: use the first non-empty column
+          targetCol = prevRow.map(d => d.col).sort((a, b) => a - b)[0];
+        } else {
+          // Previous row is left-to-right: use the last non-empty column
+          targetCol = prevRow.map(d => d.col).sort((a, b) => b - a)[0];
+        }
+        if (targetCol !== undefined) {
+          rowArr[targetCol] = rowDevices[0];
+        } else {
+          rowArr[0] = rowDevices[0];
+        }
+      } else {
+        // Normal row: fill left to right (or right to left for odd rows)
+        if (row % 2 === 1) {
+          for (let i = 0; i < rowDevices.length; i++) {
+            rowArr[numCardsPerRow - 1 - i] = rowDevices[i];
+          }
+        } else {
+          for (let i = 0; i < rowDevices.length; i++) {
+            rowArr[i] = rowDevices[i];
+          }
+        }
       }
-      
-      arrangedDevices.push(...rowDevices);
+      for (let col = 0; col < numCardsPerRow; col++) {
+        if (rowArr[col]) {
+          arrangedDevices.push({ device: rowArr[col]!, col, row });
+        }
+      }
+      deviceIdx += rowDevices.length;
     }
 
     // Create container
@@ -274,9 +303,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     }
 
     // Add cards in the arranged order
-    arrangedDevices.forEach((device, i) => {
-      const row = Math.floor(i / numCardsPerRow);
-      const col = i % numCardsPerRow;
+    arrangedDevices.forEach(({ device, col, row }, i) => {
       const zigzag = (col % 2 === 0) ? 0 : layout.zigzagOffset;
       const left = layout.startX + col * (layout.cardWidth + layout.cardGapX);
       const top = layout.margin + row * (layout.cardHeight + layout.cardGapY) + zigzag;
@@ -439,8 +466,9 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
 
       // Add connecting line if not the last card
       if (i < arrangedDevices.length - 1) {
-        const nextRow = Math.floor((i + 1) / numCardsPerRow);
-        const nextCol = (i + 1) % numCardsPerRow;
+        const next = arrangedDevices[i + 1];
+        const nextCol = next.col;
+        const nextRow = next.row;
         const nextZigzag = (nextCol % 2 === 0) ? 0 : layout.zigzagOffset;
         const nextLeft = layout.startX + nextCol * (layout.cardWidth + layout.cardGapX);
         const nextTop = layout.margin + nextRow * (layout.cardHeight + layout.cardGapY) + nextZigzag;
