@@ -6,7 +6,7 @@
   "homepage": "https://mytimeline.fredericlavigne.com",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "VITE_BUILD_DATE=$(date +%Y-%m-%d) vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "vite build",
