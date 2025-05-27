@@ -16,6 +16,7 @@
     "@revideo/core": "^0.10.4",
     "@revideo/player": "^0.10.4",
     "@types/jszip": "^3.4.0",
+    "clipboard-polyfill": "^4.1.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jszip": "^3.10.1",

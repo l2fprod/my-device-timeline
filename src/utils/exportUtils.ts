@@ -1,6 +1,7 @@
 import { Device, DeviceCategory } from '../types/types';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import * as clipboard from 'clipboard-polyfill';
 
 const toBold = (text: string): string => {
   const boldMap: Record<string, string> = {
@@ -89,7 +90,7 @@ const getCategoryEmoji = (category: DeviceCategory): string => {
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
-    await navigator.clipboard.writeText(text);
+    await clipboard.writeText(text);
     return true;
   } catch (error) {
     console.error('Failed to copy text:', error);
