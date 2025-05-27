@@ -107,7 +107,7 @@ function App() {
   };
 
   const handleDownloadImage = async () => {
-    await exportAsLinkedInImage(devices, 'tech-timeline.png');
+    await exportAsLinkedInImage(devices, 'mytimeline.png');
   };
 
   const handleDownloadPDF = async () => {
