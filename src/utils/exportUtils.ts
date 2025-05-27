@@ -97,7 +97,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-export const exportAsLinkedInImage = async (devices: Device[], fileName: string = 'tech-timeline.png'): Promise<void> => {
+export const exportAsLinkedInImage = async (devices: Device[], fileName: string = 'mytimeline.png'): Promise<void> => {
   try {
     // Initialize all layout variables
     const layout = {
@@ -605,10 +605,33 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     document.body.removeChild(container);
 
     // Download image
-    const link = document.createElement('a');
-    link.download = fileName;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    try {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error('Failed to generate image blob');
+        }
+        
+        // Create object URL from blob
+        const url = URL.createObjectURL(blob);
+        
+        // Create and configure the download link
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        
+        // Append to document, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the object URL
+        URL.revokeObjectURL(url);
+        
+      }, 'image/png', 1.0);
+    } catch (downloadError) {
+      console.error('Error during download:', downloadError);
+      throw new Error('Failed to download image. Please try again.');
+    }
   } catch (error) {
     console.error('Failed to export LinkedIn image:', error);
   }
@@ -883,7 +906,7 @@ export const exportAsPDF = async (
     }
 
     // Save the PDF
-    pdf.save('tech-timeline.pdf');
+    pdf.save('mytimeline.pdf');
     
     // Set progress to 100% when complete
     onProgress?.(100);
