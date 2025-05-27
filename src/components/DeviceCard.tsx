@@ -3,6 +3,7 @@ import { Device, DeviceCategory } from '../types/types';
 import { Edit2, Trash2 } from 'lucide-react';
 import { getDeviceImageFallback } from '../services/wikipediaService';
 import { getCategoryColor } from '../utils/categoryUtils';
+import { deviceCategories } from '../constants/deviceCategories';
 
 interface DeviceCardProps {
   device: Device;
@@ -25,18 +26,6 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onDelete, onEdit }) => 
       setImageFit('contain');
     }
   };
-
-  const deviceCategories: { value: DeviceCategory; label: string }[] = [
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'desktop', label: 'Desktop' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'smartwatch', label: 'Smartwatch' },
-    { value: 'gaming', label: 'Gaming' },
-    { value: 'audio', label: 'Audio' },
-    { value: 'camera', label: 'Camera' },
-    { value: 'other', label: 'Other' }
-  ];
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">

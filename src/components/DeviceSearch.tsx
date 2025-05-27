@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { searchWikipedia } from '../services/wikipediaService';
 import { WikipediaSearchResult, DeviceCategory } from '../types/types';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { deviceCategories } from '../constants/deviceCategories';
 
 interface DeviceSearchProps {
   onSelectDevice: (device: WikipediaSearchResult, category: DeviceCategory) => void;
@@ -30,18 +31,6 @@ const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel })
   const [selectedCategory, setSelectedCategory] = useState<DeviceCategory>('smartphone');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState<Record<string, number>>({});
-
-  const deviceCategories: { value: DeviceCategory; label: string }[] = [
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'desktop', label: 'Desktop' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'smartwatch', label: 'Smartwatch' },
-    { value: 'gaming', label: 'Gaming' },
-    { value: 'audio', label: 'Audio' },
-    { value: 'camera', label: 'Camera' },
-    { value: 'other', label: 'Other' }
-  ];
 
   // Debounce the search query
   useEffect(() => {

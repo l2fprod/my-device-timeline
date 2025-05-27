@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Device, DeviceCategory } from '../types/types';
 import { X } from 'lucide-react';
+import { deviceCategories } from '../constants/deviceCategories';
 
 interface DeviceEditModalProps {
   device: Device;
@@ -21,18 +22,6 @@ const DeviceEditModal: React.FC<DeviceEditModalProps> = ({ device, onSave, onCan
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onCancel]);
-
-  const deviceCategories: { value: DeviceCategory; label: string }[] = [
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'desktop', label: 'Desktop' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'smartwatch', label: 'Smartwatch' },
-    { value: 'gaming', label: 'Gaming' },
-    { value: 'audio', label: 'Audio' },
-    { value: 'camera', label: 'Camera' },
-    { value: 'other', label: 'Other' }
-  ];
 
   const handleSave = () => {
     onSave(editedDevice);
