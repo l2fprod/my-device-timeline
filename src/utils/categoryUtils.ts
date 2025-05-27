@@ -1,5 +1,7 @@
-export const getCategoryColor = (category: string): string => {
-  const colors: Record<string, string> = {
+import { DeviceCategory } from "../types/types";
+
+export const getCategoryColor = (category: DeviceCategory): string => {
+  const colors: Record<DeviceCategory, string> = {
     smartphone: 'bg-blue-100 text-blue-800',
     laptop: 'bg-purple-100 text-purple-800',
     desktop: 'bg-indigo-100 text-indigo-800',
