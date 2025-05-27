@@ -64,7 +64,8 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onDelete, onEdit }) => 
             ) : (
               <h3 className="text-sm sm:text-sm text-base font-medium text-gray-900 sm:truncate break-words sm:break-normal">{device.name}</h3>
             )}
-            <div className="flex space-x-1 ml-2 flex-shrink-0">
+            {/* Desktop actions */}
+            <div className="hidden sm:flex space-x-1 ml-2 flex-shrink-0">
               <button
                 onClick={() => onEdit(device)}
                 className="p-1 text-gray-400 hover:text-gray-600"
@@ -78,6 +79,21 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onDelete, onEdit }) => 
                 <Trash2 size={12} />
               </button>
             </div>
+          </div>
+          {/* Mobile actions */}
+          <div className="sm:hidden flex space-x-2 mb-2">
+            <button
+              onClick={() => onEdit(device)}
+              className="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-600"
+            >
+              <Edit2 size={14} />
+            </button>
+            <button
+              onClick={() => onDelete(device.id)}
+              className="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-red-600"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
           <div className="hidden sm:flex items-center space-x-2 mb-1">
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${getCategoryColor(device.category)}`}>
