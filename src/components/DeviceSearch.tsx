@@ -14,7 +14,6 @@ const DeviceSearch: React.FC<DeviceSearchProps> = ({ onSelectDevice, onCancel })
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<WikipediaSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<DeviceCategory>('smartphone');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState<Record<string, number>>({});
 
