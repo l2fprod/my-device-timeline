@@ -452,7 +452,6 @@ function App() {
         <div ref={timelineRef} className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 transform hover:scale-[1.01] transition-transform duration-300">
           <Timeline 
             devices={devices}
-            onAddDevice={handleAddDevice}
             onUpdateDevice={handleUpdateDevice}
             onDeleteDevice={handleDeleteDevice}
             onEditDevice={handleEditDevice}

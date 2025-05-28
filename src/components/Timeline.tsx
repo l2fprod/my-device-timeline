@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Device } from '../types/types';
 import DeviceCard from './DeviceCard';
-import { saveDevices, loadDevices } from '../services/storageService';
-import { Plus, Share } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
 import DeviceEditModal from './DeviceEditModal';
 
 interface TimelineProps {
-  onAddDevice: () => void;
   devices: Device[];
   onUpdateDevice: (device: Device) => void;
   onDeleteDevice: (deviceId: string) => void;
@@ -15,7 +11,6 @@ interface TimelineProps {
 }
 
 const Timeline: React.FC<TimelineProps> = ({ 
-  onAddDevice, 
   devices, 
   onUpdateDevice, 
   onDeleteDevice, 
@@ -66,9 +61,19 @@ const Timeline: React.FC<TimelineProps> = ({
     );
   }
   
+  // Device count display
+  const deviceCountDisplay = (
+    <div className="flex items-center justify-center mb-12 select-none">
+      <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent drop-shadow">
+        {devices.length} Device{devices.length !== 1 ? 's' : ''} in your Timeline
+      </span>
+    </div>
+  );
+  
   return (
     <div className="relative">
       <div className="py-8 px-4">
+        {deviceCountDisplay}
         <div className="relative max-w-6xl mx-auto">
           {/* Vertical timeline line */}
           <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-blue-200"></div>
