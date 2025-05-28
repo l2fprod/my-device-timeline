@@ -131,17 +131,22 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       startX: 0
     };
 
+    // Add extra margin around the cards
+    const extraMargin = 32;
     // Sort devices by year (oldest first)
     const sortedDevices = [...devices].sort((a, b) => a.startYear - b.startYear);
-    const numCardsPerRow = Math.max(1, Math.floor((layout.imageWidth - layout.margin * 2 + layout.cardGapX) / (layout.cardWidth + layout.cardGapX)));
-    const numRows = Math.ceil(sortedDevices.length / numCardsPerRow);
+    // Calculate square layout
+    const numColumns = Math.ceil(Math.sqrt(sortedDevices.length));
+    const numRows = Math.ceil(sortedDevices.length / numColumns);
+    // Dynamically set image width to fit all columns
+    layout.imageWidth = layout.margin * 2 + extraMargin * 2 + numColumns * layout.cardWidth + (numColumns - 1) * layout.cardGapX;
     // Add extra space at the bottom for attribution
     const attributionHeight = 60;
-    const imageHeight = layout.margin * 2 + numRows * layout.cardHeight + (numRows - 1) * layout.cardGapY + layout.zigzagOffset + attributionHeight;
+    const imageHeight = layout.margin * 2 + extraMargin * 2 + numRows * layout.cardHeight + (numRows - 1) * layout.cardGapY + layout.zigzagOffset + attributionHeight;
 
     // Calculate total width of all cards in a row and center position
-    const totalRowWidth = numCardsPerRow * layout.cardWidth + (numCardsPerRow - 1) * layout.cardGapX;
-    layout.startX = Math.max(0, (layout.imageWidth - totalRowWidth) / 2);
+    const totalRowWidth = numColumns * layout.cardWidth + (numColumns - 1) * layout.cardGapX;
+    layout.startX = layout.margin + extraMargin;
 
     // Arrange devices in rows with correct column placement for single-card rows
     // Build a 2D array of rows and columns
@@ -149,8 +154,8 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     const arrangedDevices: DeviceWithCol[] = [];
     let deviceIdx = 0;
     for (let row = 0; row < numRows; row++) {
-      const rowDevices = sortedDevices.slice(deviceIdx, deviceIdx + numCardsPerRow);
-      const rowArr: (Device | null)[] = Array(numCardsPerRow).fill(null);
+      const rowDevices = sortedDevices.slice(deviceIdx, deviceIdx + numColumns);
+      const rowArr: (Device | null)[] = Array(numColumns).fill(null);
       if (rowDevices.length === 1 && row > 0) {
         // Place the single device in the same column as the card it is connected to in the previous row
         const prevRow = arrangedDevices.filter(d => d.row === row - 1);
@@ -171,7 +176,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
         // Normal row: fill left to right (or right to left for odd rows)
         if (row % 2 === 1) {
           for (let i = 0; i < rowDevices.length; i++) {
-            rowArr[numCardsPerRow - 1 - i] = rowDevices[i];
+            rowArr[numColumns - 1 - i] = rowDevices[i];
           }
         } else {
           for (let i = 0; i < rowDevices.length; i++) {
@@ -179,7 +184,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
           }
         }
       }
-      for (let col = 0; col < numCardsPerRow; col++) {
+      for (let col = 0; col < numColumns; col++) {
         if (rowArr[col]) {
           arrangedDevices.push({ device: rowArr[col]!, col, row });
         }
@@ -521,10 +526,172 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     svgContainer.appendChild(museumText2);
 
     // Add cards in the arranged order
+    // First, create all connecting lines
     arrangedDevices.forEach(({ device, col, row }, i) => {
+      if (i < arrangedDevices.length - 1) {
+        const next = arrangedDevices[i + 1];
+        const nextCol = next.col;
+        const nextRow = next.row;
+        const nextZigzag = (nextCol % 2 === 0) ? 0 : layout.zigzagOffset;
+        const nextLeft = layout.startX + nextCol * (layout.cardWidth + layout.cardGapX);
+        const nextTop = layout.margin + extraMargin + nextRow * (layout.cardHeight + layout.cardGapY) + nextZigzag;
+
+        // Calculate current card position
+        const zigzag = (col % 2 === 0) ? 0 : layout.zigzagOffset;
+        const left = layout.startX + col * (layout.cardWidth + layout.cardGapX);
+        const top = layout.margin + extraMargin + row * (layout.cardHeight + layout.cardGapY) + zigzag;
+
+        // Calculate start and end points based on position
+        let startX, startY, endX, endY;
+        
+        // Check if this is the last card in a row
+        const isLastInRow = col === numColumns - 1;
+        const isFirstInRow = col === 0;
+        const isLastRow = row === numRows - 1;
+        const isFirstRow = row === 0;
+        
+        if (isLastInRow && !isLastRow && row % 2 === 0) {
+          // Last card in an odd row (except last row) - connect to the last card of next row
+          const nextLastCol = numColumns - 1;
+          const nextLastLeft = layout.startX + nextLastCol * (layout.cardWidth + layout.cardGapX);
+          const nextLastTop = layout.margin + extraMargin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextLastCol % 2 === 0) ? 0 : layout.zigzagOffset);
+          
+          startX = left + layout.cardWidth / 2;
+          startY = top + layout.cardHeight;
+          endX = nextLastLeft + layout.cardWidth / 2;
+          endY = nextLastTop; // top edge of the next card (not under it)
+        } else if (isFirstInRow && !isFirstRow && row % 2 === 1) {
+          // First card in an even row (except first row) - connect to the first card of next row
+          const nextFirstCol = 0;
+          const nextFirstLeft = layout.startX + nextFirstCol * (layout.cardWidth + layout.cardGapX);
+          const nextFirstTop = layout.margin + extraMargin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextFirstCol % 2 === 0) ? 0 : layout.zigzagOffset);
+          
+          startX = left + layout.cardWidth / 2;
+          startY = top + layout.cardHeight;
+          endX = nextFirstLeft + layout.cardWidth / 2;
+          endY = nextFirstTop; // top edge of the next card (not under it)
+        } else if (col < numColumns - 1) {
+          // Same row - connect right to left
+          startX = left + layout.cardWidth;
+          startY = top + layout.cardHeight / 2;
+          endX = nextLeft;
+          endY = nextTop + layout.cardHeight / 2;
+        } else {
+          // Skip connection for last card of odd rows and even rows
+          return;
+        }
+
+        // Create path
+        let pathData;
+        
+        if ((isLastInRow && !isLastRow) || (isFirstInRow && !isFirstRow)) {
+          // Vertical connection for row transitions
+          pathData = `M ${startX} ${startY} 
+                     C ${startX} ${startY + layout.cardGapY/2},
+                       ${endX} ${endY - layout.cardGapY/2},
+                       ${endX} ${endY}`;
+        } else {
+          // Horizontal connection for same row
+          pathData = `M ${startX} ${startY} 
+                     C ${startX + layout.cardGapX/2} ${startY},
+                       ${endX - layout.cardGapX/2} ${endY},
+                       ${endX} ${endY}`;
+        }
+
+        // Create the main electric cable path
+        const cablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        cablePath.setAttribute('d', pathData);
+        cablePath.setAttribute('stroke', 'url(#electricGradient)');
+        cablePath.setAttribute('stroke-width', '6');
+        cablePath.setAttribute('fill', 'none');
+        cablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
+        
+        // Create the inner glow path
+        const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        glowPath.setAttribute('d', pathData);
+        glowPath.setAttribute('stroke', '#ffffff');
+        glowPath.setAttribute('stroke-width', '2');
+        glowPath.setAttribute('fill', 'none');
+        glowPath.style.filter = 'blur(2px)';
+
+        svgContainer.appendChild(glowPath);
+        svgContainer.appendChild(cablePath);
+
+        // Add random sparkles along the path
+        const numSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
+        for (let i = 0; i < numSparkles; i++) {
+          const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          const t = Math.random(); // Random position along the path
+          
+          // Calculate position along the path
+          const x = startX + (endX - startX) * t;
+          const y = startY + (endY - startY) * t;
+          
+          sparkle.setAttribute('cx', x.toString());
+          sparkle.setAttribute('cy', y.toString());
+          sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
+          sparkle.setAttribute('fill', '#ffffff');
+          sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
+          
+          svgContainer.appendChild(sparkle);
+        }
+
+        // For first card of even rows, also create a connection to the next card in the same row
+        if (isFirstInRow && row % 2 === 1 && !isLastRow) {
+          // Calculate positions for current and next card in the same row
+          const nextCardCol = col + 1;
+          const nextCardZigzag = (nextCardCol % 2 === 0) ? 0 : layout.zigzagOffset;
+          const nextCardLeft = layout.startX + nextCardCol * (layout.cardWidth + layout.cardGapX);
+          const nextCardTop = layout.margin + extraMargin + row * (layout.cardHeight + layout.cardGapY) + nextCardZigzag;
+
+          const horizontalPathData = `M ${left + layout.cardWidth} ${top + layout.cardHeight / 2} 
+                                    C ${left + layout.cardWidth + layout.cardGapX/2} ${top + layout.cardHeight / 2},
+                                      ${nextCardLeft - layout.cardGapX/2} ${nextCardTop + layout.cardHeight / 2},
+                                      ${nextCardLeft} ${nextCardTop + layout.cardHeight / 2}`;
+
+          // Create the main electric cable path
+          const horizontalCablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          horizontalCablePath.setAttribute('d', horizontalPathData);
+          horizontalCablePath.setAttribute('stroke', 'url(#electricGradient)');
+          horizontalCablePath.setAttribute('stroke-width', '6');
+          horizontalCablePath.setAttribute('fill', 'none');
+          horizontalCablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
+          
+          // Create the inner glow path
+          const horizontalGlowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          horizontalGlowPath.setAttribute('d', horizontalPathData);
+          horizontalGlowPath.setAttribute('stroke', '#ffffff');
+          horizontalGlowPath.setAttribute('stroke-width', '2');
+          horizontalGlowPath.setAttribute('fill', 'none');
+          horizontalGlowPath.style.filter = 'blur(2px)';
+
+          svgContainer.appendChild(horizontalGlowPath);
+          svgContainer.appendChild(horizontalCablePath);
+
+          // Add random sparkles along the horizontal path
+          const numHorizontalSparkles = Math.floor(Math.random() * 5) + 3;
+          for (let i = 0; i < numHorizontalSparkles; i++) {
+            const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            const t = Math.random(); // Random position along the path
+            // Calculate position along the path
+            const x = (left + layout.cardWidth) + (nextCardLeft - (left + layout.cardWidth)) * t;
+            const y = top + layout.cardHeight / 2;
+            sparkle.setAttribute('cx', x.toString());
+            sparkle.setAttribute('cy', y.toString());
+            sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
+            sparkle.setAttribute('fill', '#ffffff');
+            sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
+            svgContainer.appendChild(sparkle);
+          }
+        }
+      }
+    });
+
+    // Now render all cards
+    arrangedDevices.forEach(({ device, col, row }) => {
       const zigzag = (col % 2 === 0) ? 0 : layout.zigzagOffset;
       const left = layout.startX + col * (layout.cardWidth + layout.cardGapX);
-      const top = layout.margin + row * (layout.cardHeight + layout.cardGapY) + zigzag;
+      const top = layout.margin + extraMargin + row * (layout.cardHeight + layout.cardGapY) + zigzag;
 
       // Get unique colors for this card
       const [color1, color2] = getCardColors(`${device.startYear}${device.name}`);
@@ -681,160 +848,6 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       card.appendChild(sparkle);
 
       container.appendChild(card);
-
-      // Add connecting line if not the last card
-      if (i < arrangedDevices.length - 1) {
-        const next = arrangedDevices[i + 1];
-        const nextCol = next.col;
-        const nextRow = next.row;
-        const nextZigzag = (nextCol % 2 === 0) ? 0 : layout.zigzagOffset;
-        const nextLeft = layout.startX + nextCol * (layout.cardWidth + layout.cardGapX);
-        const nextTop = layout.margin + nextRow * (layout.cardHeight + layout.cardGapY) + nextZigzag;
-
-        // Calculate start and end points based on position
-        let startX, startY, endX, endY;
-        
-        // Check if this is the last card in a row
-        const isLastInRow = col === numCardsPerRow - 1;
-        const isFirstInRow = col === 0;
-        const isLastRow = row === numRows - 1;
-        const isFirstRow = row === 0;
-        
-        if (isLastInRow && !isLastRow && row % 2 === 0) {
-          // Last card in an odd row (except last row) - connect to the last card of next row
-          const nextLastCol = numCardsPerRow - 1;
-          const nextLastLeft = layout.startX + nextLastCol * (layout.cardWidth + layout.cardGapX);
-          const nextLastTop = layout.margin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextLastCol % 2 === 0) ? 0 : layout.zigzagOffset);
-          
-          startX = left + layout.cardWidth / 2;
-          startY = top + layout.cardHeight;
-          endX = nextLastLeft + layout.cardWidth / 2;
-          endY = nextLastTop;
-        } else if (isFirstInRow && !isFirstRow && row % 2 === 1) {
-          // First card in an even row (except first row) - connect to the first card of next row
-          const nextFirstCol = 0;
-          const nextFirstLeft = layout.startX + nextFirstCol * (layout.cardWidth + layout.cardGapX);
-          const nextFirstTop = layout.margin + (row + 1) * (layout.cardHeight + layout.cardGapY) + ((nextFirstCol % 2 === 0) ? 0 : layout.zigzagOffset);
-          
-          startX = left + layout.cardWidth / 2;
-          startY = top + layout.cardHeight;
-          endX = nextFirstLeft + layout.cardWidth / 2;
-          endY = nextFirstTop;
-        } else if (col < numCardsPerRow - 1) {
-          // Same row - connect right to left
-          startX = left + layout.cardWidth;
-          startY = top + layout.cardHeight / 2;
-          endX = nextLeft;
-          endY = nextTop + layout.cardHeight / 2;
-        } else {
-          // Skip connection for last card of odd rows and even rows
-          return;
-        }
-
-        // Create path
-        let pathData;
-        
-        if ((isLastInRow && !isLastRow) || (isFirstInRow && !isFirstRow)) {
-          // Vertical connection for row transitions
-          pathData = `M ${startX} ${startY} 
-                     C ${startX} ${startY + layout.cardGapY/2},
-                       ${endX} ${endY - layout.cardGapY/2},
-                       ${endX} ${endY}`;
-        } else {
-          // Horizontal connection for same row
-          pathData = `M ${startX} ${startY} 
-                     C ${startX + layout.cardGapX/2} ${startY},
-                       ${endX - layout.cardGapX/2} ${endY},
-                       ${endX} ${endY}`;
-        }
-
-        // Create the main electric cable path
-        const cablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        cablePath.setAttribute('d', pathData);
-        cablePath.setAttribute('stroke', 'url(#electricGradient)');
-        cablePath.setAttribute('stroke-width', '6');
-        cablePath.setAttribute('fill', 'none');
-        cablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
-        
-        // Create the inner glow path
-        const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        glowPath.setAttribute('d', pathData);
-        glowPath.setAttribute('stroke', '#ffffff');
-        glowPath.setAttribute('stroke-width', '2');
-        glowPath.setAttribute('fill', 'none');
-        glowPath.style.filter = 'blur(2px)';
-
-        svgContainer.appendChild(glowPath);
-        svgContainer.appendChild(cablePath);
-
-        // Add random sparkles along the path
-        const numSparkles = Math.floor(Math.random() * 5) + 3; // 3-7 sparkles
-        for (let i = 0; i < numSparkles; i++) {
-          const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          const t = Math.random(); // Random position along the path
-          
-          // Calculate position along the path
-          const x = startX + (endX - startX) * t;
-          const y = startY + (endY - startY) * t;
-          
-          sparkle.setAttribute('cx', x.toString());
-          sparkle.setAttribute('cy', y.toString());
-          sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
-          sparkle.setAttribute('fill', '#ffffff');
-          sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
-          
-          svgContainer.appendChild(sparkle);
-        }
-
-        // For first card of even rows, also create a connection to the next card in the same row
-        if (isFirstInRow && row % 2 === 1 && !isLastRow) {
-          const nextCardLeft = startX + (col + 1) * (layout.cardWidth + layout.cardGapX);
-          const nextCardTop = top; // Same row, so same top position
-
-          const horizontalPathData = `M ${left + layout.cardWidth} ${top + layout.cardHeight / 2} 
-                                    C ${left + layout.cardWidth + layout.cardGapX/2} ${top + layout.cardHeight / 2},
-                                      ${nextCardLeft - layout.cardGapX/2} ${nextCardTop + layout.cardHeight / 2},
-                                      ${nextCardLeft} ${nextCardTop + layout.cardHeight / 2}`;
-
-          // Create the main electric cable path
-          const horizontalCablePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          horizontalCablePath.setAttribute('d', horizontalPathData);
-          horizontalCablePath.setAttribute('stroke', 'url(#electricGradient)');
-          horizontalCablePath.setAttribute('stroke-width', '6');
-          horizontalCablePath.setAttribute('fill', 'none');
-          horizontalCablePath.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.8))';
-          
-          // Create the inner glow path
-          const horizontalGlowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          horizontalGlowPath.setAttribute('d', horizontalPathData);
-          horizontalGlowPath.setAttribute('stroke', '#ffffff');
-          horizontalGlowPath.setAttribute('stroke-width', '2');
-          horizontalGlowPath.setAttribute('fill', 'none');
-          horizontalGlowPath.style.filter = 'blur(2px)';
-
-          svgContainer.appendChild(horizontalGlowPath);
-          svgContainer.appendChild(horizontalCablePath);
-
-          // Add random sparkles along the horizontal path
-          const numHorizontalSparkles = Math.floor(Math.random() * 5) + 3;
-          for (let i = 0; i < numHorizontalSparkles; i++) {
-            const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            const t = Math.random(); // Random position along the path
-            
-            // Calculate position along the path
-            const x = (left + layout.cardWidth) + (nextCardLeft - (left + layout.cardWidth)) * t;
-            const y = top + layout.cardHeight / 2;
-            
-            sparkle.setAttribute('cx', x.toString());
-            sparkle.setAttribute('cy', y.toString());
-            sparkle.setAttribute('r', (Math.random() * 2 + 1).toString()); // Random size 1-3
-            sparkle.setAttribute('fill', '#ffffff');
-            sparkle.style.filter = 'blur(1px) drop-shadow(0 0 4px rgba(255,255,255,0.8))';
-            
-            svgContainer.appendChild(sparkle);
-          }
-        }
-      }
     });
 
     // Generate image
