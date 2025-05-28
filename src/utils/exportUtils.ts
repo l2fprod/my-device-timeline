@@ -36,6 +36,25 @@ const getRandomIntro = (): string => {
   return intros[Math.floor(Math.random() * intros.length)];
 };
 
+function getCardColors(seed: string) {
+  // Simple hash to pick a color pair from a palette
+  const palette = [
+    ['#ffb347', '#ffcc33'], // orange-yellow
+    ['#6dd5ed', '#2193b0'], // blue-cyan
+    ['#f7971e', '#ffd200'], // orange-gold
+    ['#f953c6', '#b91d73'], // pink-purple
+    ['#43cea2', '#185a9d'], // green-blue
+    ['#ff6e7f', '#bfe9ff'], // pink-lightblue
+    ['#f7797d', '#FBD786'], // red-yellow
+    ['#c471f5', '#fa71cd'], // purple-pink
+    ['#30cfd0', '#330867'], // teal-indigo
+    ['#f857a6', '#ff5858'], // magenta-red
+  ];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % palette.length;
+  return palette[Math.abs(hash) % palette.length];
+}
+
 export const formatForLinkedIn = (devices: Device[]): string => {
   // Sort devices by start year (oldest first) and then alphabetically
   const sortedDevices = [...devices].sort((a, b) => {
@@ -186,7 +205,7 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     svgContainer.style.width = `${layout.imageWidth}px`;
     svgContainer.style.height = `${imageHeight}px`;
     svgContainer.style.pointerEvents = 'none';
-    svgContainer.style.zIndex = '1';
+    svgContainer.style.zIndex = '3';
     container.appendChild(svgContainer);
 
     // Add gradient definition to the SVG container
@@ -214,6 +233,52 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
     });
     
     defs.appendChild(gradient);
+
+    // Add vintage frame gradient
+    const frameGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    frameGradient.setAttribute('id', 'frameGradient');
+    frameGradient.setAttribute('x1', '0%');
+    frameGradient.setAttribute('y1', '0%');
+    frameGradient.setAttribute('x2', '100%');
+    frameGradient.setAttribute('y2', '100%');
+    
+    const frameColors = [
+      { offset: '0%', color: '#8B4513' },
+      { offset: '50%', color: '#A0522D' },
+      { offset: '100%', color: '#8B4513' }
+    ];
+    
+    frameColors.forEach(({ offset, color }) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', color);
+      frameGradient.appendChild(stop);
+    });
+    
+    defs.appendChild(frameGradient);
+
+    // Add gold gradient for decorative elements
+    const goldGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    goldGradient.setAttribute('id', 'goldGradient');
+    goldGradient.setAttribute('x1', '0%');
+    goldGradient.setAttribute('y1', '0%');
+    goldGradient.setAttribute('x2', '100%');
+    goldGradient.setAttribute('y2', '100%');
+    
+    const goldColors = [
+      { offset: '0%', color: '#FFD700' },
+      { offset: '50%', color: '#DAA520' },
+      { offset: '100%', color: '#FFD700' }
+    ];
+    
+    goldColors.forEach(({ offset, color }) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', color);
+      goldGradient.appendChild(stop);
+    });
+    
+    defs.appendChild(goldGradient);
 
     // Add lens flare gradient
     const flareGradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
@@ -249,6 +314,43 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       return flare;
     }
 
+    // Add vintage frame
+    const frameStroke = 40; // Make the frame thick and on the edge
+    const frame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    frame.setAttribute('x', '0');
+    frame.setAttribute('y', '0');
+    frame.setAttribute('width', layout.imageWidth.toString());
+    frame.setAttribute('height', imageHeight.toString());
+    frame.setAttribute('fill', 'none');
+    frame.setAttribute('stroke', 'url(#frameGradient)');
+    frame.setAttribute('stroke-width', frameStroke.toString());
+    frame.setAttribute('rx', '48');
+    frame.setAttribute('ry', '48');
+    frame.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))';
+    svgContainer.appendChild(frame);
+
+    // Add decorative corner elements at the true corners
+    const cornerSize = 90;
+    const corners = [
+      { x: 0, y: 0, rotate: 0 },
+      { x: layout.imageWidth, y: 0, rotate: 90 },
+      { x: 0, y: imageHeight, rotate: 270 },
+      { x: layout.imageWidth, y: imageHeight, rotate: 180 }
+    ];
+    corners.forEach(({ x, y, rotate }) => {
+      const corner = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      // Draw a triangle that hugs the corner
+      const points = [
+        `${x},${y}`,
+        `${x + (rotate === 90 || rotate === 180 ? -cornerSize : cornerSize)},${y}`,
+        `${x},${y + (rotate >= 180 ? -cornerSize : cornerSize)}`
+      ].join(' ');
+      corner.setAttribute('points', points);
+      corner.setAttribute('fill', 'url(#goldGradient)');
+      corner.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))';
+      svgContainer.appendChild(corner);
+    });
+
     // Add random lens flares
     const numFlares = Math.floor(Math.random() * 5) + 3; // 3-7 flares
     for (let i = 0; i < numFlares; i++) {
@@ -259,49 +361,164 @@ export const exportAsLinkedInImage = async (devices: Device[], fileName: string 
       svgContainer.appendChild(flare);
     }
 
-    // Add website attribution
-    const attribution = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    attribution.setAttribute('x', '50%');
-    attribution.setAttribute('y', `${imageHeight - 20}px`);
-    attribution.setAttribute('text-anchor', 'middle');
-    attribution.setAttribute('fill', 'rgba(255,255,255,0.7)');
-    attribution.setAttribute('font-family', 'Arial, sans-serif');
-    attribution.setAttribute('font-size', '16');
-    attribution.setAttribute('font-weight', 'bold');
-    attribution.textContent = 'Create your own at mytimeline.fredericlavigne.com';
-    attribution.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
-    svgContainer.appendChild(attribution);
+    // Museum-style gold plate for attribution
+    // Gold gradient for plate
+    const museumGoldGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    museumGoldGradient.setAttribute('id', 'museumGoldGradient');
+    museumGoldGradient.setAttribute('x1', '0%');
+    museumGoldGradient.setAttribute('y1', '0%');
+    museumGoldGradient.setAttribute('x2', '100%');
+    museumGoldGradient.setAttribute('y2', '100%');
+    const museumGoldStops = [
+      { offset: '0%', color: '#f7e199' },
+      { offset: '30%', color: '#bfa14a' },
+      { offset: '50%', color: '#fffbe6' },
+      { offset: '70%', color: '#bfa14a' },
+      { offset: '100%', color: '#f7e199' }
+    ];
+    museumGoldStops.forEach(({ offset, color }) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', color);
+      museumGoldGradient.appendChild(stop);
+    });
+    defs.appendChild(museumGoldGradient);
 
-    // Add a subtle glow effect behind the text
-    const textGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    textGlow.setAttribute('x', '50%');
-    textGlow.setAttribute('y', `${imageHeight - 40}px`);
-    textGlow.setAttribute('width', '400');
-    textGlow.setAttribute('height', '30');
-    textGlow.setAttribute('rx', '15');
-    textGlow.setAttribute('fill', 'rgba(0,0,0,0.2)');
-    textGlow.setAttribute('transform', 'translate(-200, -15)');
-    textGlow.style.filter = 'blur(10px)';
-    svgContainer.appendChild(textGlow);
+    // Plate proportions
+    const museumPlateWidth = Math.round(layout.imageWidth * 0.38); // about 1/3 of the image width
+    const museumPlateHeight = Math.round(museumPlateWidth * 0.13); // about 1/8 as tall as wide
+    const museumPlateX = Math.round(layout.imageWidth / 2 - museumPlateWidth / 2);
+    const museumPlateBottomMargin = 18;
+    const museumPlateY = imageHeight - museumPlateHeight - museumPlateBottomMargin;
 
-    function getCardColors(seed: string) {
-      // Simple hash to pick a color pair from a palette
-      const palette = [
-        ['#ffb347', '#ffcc33'], // orange-yellow
-        ['#6dd5ed', '#2193b0'], // blue-cyan
-        ['#f7971e', '#ffd200'], // orange-gold
-        ['#f953c6', '#b91d73'], // pink-purple
-        ['#43cea2', '#185a9d'], // green-blue
-        ['#ff6e7f', '#bfe9ff'], // pink-lightblue
-        ['#f7797d', '#FBD786'], // red-yellow
-        ['#c471f5', '#fa71cd'], // purple-pink
-        ['#30cfd0', '#330867'], // teal-indigo
-        ['#f857a6', '#ff5858'], // magenta-red
-      ];
-      let hash = 0;
-      for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % palette.length;
-      return palette[Math.abs(hash) % palette.length];
+    // Plate base
+    const museumPlate = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    museumPlate.setAttribute('x', museumPlateX.toString());
+    museumPlate.setAttribute('y', museumPlateY.toString());
+    museumPlate.setAttribute('width', museumPlateWidth.toString());
+    museumPlate.setAttribute('height', museumPlateHeight.toString());
+    museumPlate.setAttribute('rx', '7');
+    museumPlate.setAttribute('ry', '7');
+    museumPlate.setAttribute('fill', 'url(#museumGoldGradient)');
+    museumPlate.setAttribute('stroke', '#a48a3b');
+    museumPlate.setAttribute('stroke-width', '2.5');
+    museumPlate.style.filter = 'drop-shadow(0 2px 8px #0005)';
+    svgContainer.appendChild(museumPlate);
+
+    // Beveled inner border
+    const museumPlateInner = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    museumPlateInner.setAttribute('x', (museumPlateX + 3).toString());
+    museumPlateInner.setAttribute('y', (museumPlateY + 3).toString());
+    museumPlateInner.setAttribute('width', (museumPlateWidth - 6).toString());
+    museumPlateInner.setAttribute('height', (museumPlateHeight - 6).toString());
+    museumPlateInner.setAttribute('rx', '4');
+    museumPlateInner.setAttribute('ry', '4');
+    museumPlateInner.setAttribute('fill', 'none');
+    museumPlateInner.setAttribute('stroke', '#fffbe6');
+    museumPlateInner.setAttribute('stroke-width', '1');
+    museumPlateInner.style.opacity = '0.7';
+    svgContainer.appendChild(museumPlateInner);
+
+    // Screws (left and right)
+    const screwRadius = 4;
+    const screwY = museumPlateY + museumPlateHeight / 2;
+    const screwLeftX = museumPlateX + 14;
+    const screwRightX = museumPlateX + museumPlateWidth - 14;
+    [screwLeftX, screwRightX].forEach((cx) => {
+      const screw = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      screw.setAttribute('cx', cx.toString());
+      screw.setAttribute('cy', screwY.toString());
+      screw.setAttribute('r', screwRadius.toString());
+      screw.setAttribute('fill', '#bfa14a');
+      screw.setAttribute('stroke', '#fffbe6');
+      screw.setAttribute('stroke-width', '1');
+      screw.style.filter = 'drop-shadow(0 1px 2px #0006)';
+      svgContainer.appendChild(screw);
+    });
+
+    // Engraved museum text (two lines)
+    const museumTextLine1 = 'CREATE YOUR OWN TIMELINE';
+    const museumTextLine2 = 'MYTIMELINE.FREDERICLAVIGNE.COM';
+    // Calculate plate width based on the longer line
+    let maxTextWidth = museumPlateWidth;
+    const textPadding = 80;
+    let fontSize = Math.round(museumPlateHeight * 0.38);
+    {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.font = `bold ${fontSize}px Arial Black, Arial, sans-serif`;
+        const line1Width = ctx.measureText(museumTextLine1).width;
+        const line2Width = ctx.measureText(museumTextLine2).width;
+        maxTextWidth = Math.max(line1Width, line2Width);
+      }
     }
+    const newPlateWidth = Math.max(museumPlateWidth, Math.round(maxTextWidth + textPadding));
+    const newPlateX = Math.round(layout.imageWidth / 2 - newPlateWidth / 2);
+    // Adjust plate width
+    museumPlate.setAttribute('x', newPlateX.toString());
+    museumPlate.setAttribute('width', newPlateWidth.toString());
+    museumPlateInner.setAttribute('x', (newPlateX + 3).toString());
+    museumPlateInner.setAttribute('width', (newPlateWidth - 6).toString());
+    // Adjust screws
+    const newScrewLeftX = newPlateX + 14;
+    const newScrewRightX = newPlateX + newPlateWidth - 14;
+    // Remove old screws (if any)
+    const oldScrews = Array.from(svgContainer.querySelectorAll('circle'));
+    oldScrews.forEach(s => svgContainer.removeChild(s));
+    [newScrewLeftX, newScrewRightX].forEach((cx) => {
+      const screw = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      screw.setAttribute('cx', cx.toString());
+      screw.setAttribute('cy', screwY.toString());
+      screw.setAttribute('r', screwRadius.toString());
+      screw.setAttribute('fill', '#bfa14a');
+      screw.setAttribute('stroke', '#fffbe6');
+      screw.setAttribute('stroke-width', '1');
+      screw.style.filter = 'drop-shadow(0 1px 2px #0006)';
+      svgContainer.appendChild(screw);
+    });
+    // Adjust plate height for two lines
+    const newPlateHeight = Math.round(museumPlateHeight * 1.35); // More compact
+    const plateTop = museumPlateY - (newPlateHeight - museumPlateHeight) / 2;
+    museumPlate.setAttribute('height', newPlateHeight.toString());
+    museumPlate.setAttribute('y', plateTop.toString());
+    museumPlateInner.setAttribute('height', (newPlateHeight - 6).toString());
+    museumPlateInner.setAttribute('y', (plateTop + 3).toString());
+    // Center two lines of text vertically
+    const lineSpacing = Math.round(fontSize * 0.25);
+    const textBlockHeight = fontSize * 2 + lineSpacing;
+    const textBlockTop = plateTop + (newPlateHeight - textBlockHeight) / 2;
+    const textY1 = Math.round(textBlockTop + fontSize);
+    const textY2 = Math.round(textY1 + lineSpacing + fontSize);
+    // Add two lines of text
+    const museumText1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    museumText1.setAttribute('x', (layout.imageWidth / 2).toString());
+    museumText1.setAttribute('y', textY1.toString());
+    museumText1.setAttribute('text-anchor', 'middle');
+    museumText1.setAttribute('font-family', 'Arial Black, Arial, sans-serif');
+    museumText1.setAttribute('font-size', fontSize.toString());
+    museumText1.setAttribute('font-weight', 'bold');
+    museumText1.setAttribute('letter-spacing', '1.2px');
+    museumText1.textContent = museumTextLine1;
+    museumText1.setAttribute('fill', '#3a2d13');
+    museumText1.setAttribute('stroke', '#fffbe6');
+    museumText1.setAttribute('stroke-width', '0.8');
+    museumText1.style.filter = 'drop-shadow(0 1px 0 #fffbe6) drop-shadow(0 2px 2px #0007)';
+    svgContainer.appendChild(museumText1);
+    const museumText2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    museumText2.setAttribute('x', (layout.imageWidth / 2).toString());
+    museumText2.setAttribute('y', textY2.toString());
+    museumText2.setAttribute('text-anchor', 'middle');
+    museumText2.setAttribute('font-family', 'Arial Black, Arial, sans-serif');
+    museumText2.setAttribute('font-size', fontSize.toString());
+    museumText2.setAttribute('font-weight', 'bold');
+    museumText2.setAttribute('letter-spacing', '1.2px');
+    museumText2.textContent = museumTextLine2;
+    museumText2.setAttribute('fill', '#3a2d13');
+    museumText2.setAttribute('stroke', '#fffbe6');
+    museumText2.setAttribute('stroke-width', '0.8');
+    museumText2.style.filter = 'drop-shadow(0 1px 0 #fffbe6) drop-shadow(0 2px 2px #0007)';
+    svgContainer.appendChild(museumText2);
 
     // Add cards in the arranged order
     arrangedDevices.forEach(({ device, col, row }, i) => {
@@ -691,24 +908,6 @@ export const exportAsPDF = async (
     // Calculate margins to center the card both horizontally and vertically
     const marginX = (pageWidth - cardWidth) / 2;
     const marginY = (pageHeight - cardHeight) / 2;
-
-    function getCardColors(seed: string) {
-      const palette = [
-        ['#ffb347', '#ffcc33'], // orange-yellow
-        ['#6dd5ed', '#2193b0'], // blue-cyan
-        ['#f7971e', '#ffd200'], // orange-gold
-        ['#f953c6', '#b91d73'], // pink-purple
-        ['#43cea2', '#185a9d'], // green-blue
-        ['#ff6e7f', '#bfe9ff'], // pink-lightblue
-        ['#f7797d', '#FBD786'], // red-yellow
-        ['#c471f5', '#fa71cd'], // purple-pink
-        ['#30cfd0', '#330867'], // teal-indigo
-        ['#f857a6', '#ff5858'], // magenta-red
-      ];
-      let hash = 0;
-      for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % palette.length;
-      return palette[Math.abs(hash) % palette.length];
-    }
 
     // Process each device
     for (let i = 0; i < sortedDevices.length; i++) {
